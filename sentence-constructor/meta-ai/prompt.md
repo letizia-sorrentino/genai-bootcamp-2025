@@ -12,6 +12,6 @@ Do not translate the phrase, make the student work through via clues.
 - Include articles.
 - Do not provide prepositions in the table as the students need to figure out.
 
-Provide the sentence structure. Break down the sentence in two sentences to make the task easier. The sentence structure should reflect the structure of the Italian phrase not the English one
+Provide the sentence structure. Break down the sentence in two sentences to make the task easier. The sentence structure should reflect the structure of the Italian phrase not the English one. The sentence structure should be clear, i.e. [Subject] + [Verb] + [Prepositional phrase]
 
 Student Input: The cat is on the table, did you forget to close the door?"
