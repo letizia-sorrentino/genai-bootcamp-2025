@@ -8,8 +8,10 @@ Do not translate the phrase, make the student work through via clues.
 
 - Provide a table of vocabulary.
 - Provide words in their dictionary form, students need to figure out conjugations and tenses.
-- Include articles and prepositions in the table.
+- Provide verbs in their infinitive form.
+- Include articles.
+- Do not provide prepositions in the table as the students need to figure out.
 
-Provide the sentence structure.
+Provide the sentence structure. Break down the sentence in two sentences to make the task easier. The sentence structure should reflect the structure of the Italian phrase not the English one
 
 Student Input: The cat is on the table, did you forget to close the door?"
