@@ -14,7 +14,7 @@
 - Words must be in their dictionary form (nouns, adjectives, verbs in infinitive form).
 - Provide words in their dictionary form, students need to figure out conjugations and tenses.
 - Provide verbs in their infinitive form.
-- Include definite and indefinite articles.
+- Articles must be listed in a separate row, not combined with nouns.
 - Do NOT include prepositions—the student must determine the correct ones.
 
 ### Sentence Structure 
@@ -40,42 +40,60 @@
         The cat is on the table, did you forget to close the door?
     </user:input>
 
-<score>4</score>
+<score>5</score>
     <score_reasons>
-    - BAD: the table combines articles with nouns. The student needs to figure that out.
+    - GOOD: articles are not combined with nouns in the vocabulary table.
+    - GOOD: the sentence is broken down into two parts.
+    - BAD: the clues contain translations such as "the cat" and "the table". 
     </score_reasons>
 
 <assistant:output>
-# README
+### **English Sentence**
+**The cat is on the table, did you forget to close the door?**
 
-## Step 1: Vocabulary Table
+---
 
-| English          | Italian     |
-|-----------------|--------------|
-| the cat        | il gatto      |
-| to be          | essere       |
-| on            | (student must determine) |
-| the table      | il tavolo     |
-| to forget      | dimenticare  |
-| to close       | chiudere     |
-| the door       | la porta     |
-| you (informal) | tu          |
-| you (formal)   | Lei         |
+### **Vocabulary Table**
 
-## Step 2: Sentence Structure
+| English        | Italian       |
+|---------------|--------------|
+| cat           | gatto        |
+| table         | tavolo       |
+| door          | porta        |
+| to forget     | dimenticare  |
+| to close      | chiudere     |
+| is           | essere       |
+| you (informal) | tu           |
+| you (formal) | Lei          |
+| on            | -            |
+| the           | il / la      |
 
-1. **The cat is on the table.** → `[Subject] + [Verb] + [Prepositional Phrase]`
-2. **Did you forget to close the door?** → `[Verb] + [Subject] + [Infinitive Phrase]?`
+---
 
-## Step 3: Hints
+### **Sentence Structure**
+1. **The cat is on the table** → [Subject] + [Verb] + [Prepositional-Phrase]  
+   - **Subject**: "The cat" → **Il gatto** (Watch out for the article!)
+   - **Verb**: "is" (from **essere**) → What is the correct conjugation for **essere** in the present tense?
+   - **Prepositional phrase**: "on the table" → Which preposition is used for "on" in Italian?
 
-1. **"The cat is on the table."**
-   - What is the correct conjugation of “essere” for “il gatto” (third-person singular)?
-   - What preposition do we use for “on the table”? (Think about “su” + definite article.)
+2. **Did you forget to close the door?** → [Verb] + [Subject] + [Infinitive Verb] + [Object]  
+   - This is a question! In Italian, yes/no questions often keep the same word order as statements.
+   - "Did you forget" → The main verb is **dimenticare**. What tense do we need?
+   - "To close the door" → The verb "to close" stays in the **infinitive** form.  
 
-2. **"Did you forget to close the door?"**
-   - In Italian, questions don’t require auxiliary verbs like “do”—how would you structure this?
-   - “Dimenticare” is a regular -are verb. How would you conjugate it for “you” (tu)?
-   - “To close” (chiudere) should remain in its infinitive form after “dimenticare”.
+---
+
+### **Hints & Questions**
+1. What is the correct conjugation of **essere** for "the cat" (**il gatto**) in the present tense?  
+2. Which Italian preposition do we use for "on" in "on the table"?  
+3. "Did you forget" is in the **past**. How do we form the past tense of **dimenticare**?  
+4. In Italian, direct object pronouns can sometimes be used with past participles. Can you figure out if "la porta" needs one?
+
+---
+
+### **Your Task**
+Use the hints and the vocabulary table to construct the correct Italian translation of the sentence. Try it yourself before checking with a teacher or reference material.
+
+Good luck! 😊
 </assistant:output>
 </example>
