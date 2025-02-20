@@ -33,6 +33,7 @@
 - Provide hints about tricky grammatical points, such as gender agreement or verb conjugation.
 - If the sentence is incorrect, offer subtle corrections and explain why.
 - Encourage self-correction by prompting the student to rethink their choices.
+- Do not include the translation of the sentence in the prompt. The student should work on that.
 
 ## Examples Response from ChatGPT
 <example>
@@ -40,60 +41,58 @@
         The cat is on the table, did you forget to close the door?
     </user:input>
 
-<score>5</score>
+<score>7</score>
     <score_reasons>
     - GOOD: articles are not combined with nouns in the vocabulary table.
     - GOOD: the sentence is broken down into two parts.
-    - BAD: the clues contain translations such as "the cat" and "the table". 
+    - GOOD: the clues contain hints and do not translate part of the sentence.
     </score_reasons>
 
 <assistant:output>
-### **English Sentence**
-**The cat is on the table, did you forget to close the door?**
+### **Vocabulary Table**  
+
+| English           | Italian         |
+|------------------|----------------|
+| the             | il / la         |
+| cat            | gatto / gatta   |
+| to be          | essere          |
+| on            | **(student decides the correct preposition)** |
+| table         | tavolo / tavola  |
+| to forget     | dimenticare     |
+| to close      | chiudere        |
+| door         | porta          |
+| you (informal)  | tu             |
+| you (formal)    | Lei            |
 
 ---
 
-### **Vocabulary Table**
+### **Sentence Structure**  
 
-| English        | Italian       |
-|---------------|--------------|
-| cat           | gatto        |
-| table         | tavolo       |
-| door          | porta        |
-| to forget     | dimenticare  |
-| to close      | chiudere     |
-| is           | essere       |
-| you (informal) | tu           |
-| you (formal) | Lei          |
-| on            | -            |
-| the           | il / la      |
+1. **[Subject] + [Verb] + [Prepositional Phrase]**  
+   - [The cat] + [is] + [on the table]  
+   
+2. **[Auxiliary Verb] + [Subject] + [Verb] + [Object]?**  
+   - [Did] + [you] + [forget] + [to close the door]?  
 
 ---
 
-### **Sentence Structure**
-1. **The cat is on the table** → [Subject] + [Verb] + [Prepositional-Phrase]  
-   - **Subject**: "The cat" → **Il gatto** (Watch out for the article!)
-   - **Verb**: "is" (from **essere**) → What is the correct conjugation for **essere** in the present tense?
-   - **Prepositional phrase**: "on the table" → Which preposition is used for "on" in Italian?
+### **Hints & Questions for You:**  
+1. **Noun Gender Agreement:**  
+   - "Cat" can be *gatto* (masculine) or *gatta* (feminine). Which one do you choose?  
+   - "Table" can be *tavolo* (masculine, general use) or *tavola* (feminine, often for meals). Which one fits better here?  
 
-2. **Did you forget to close the door?** → [Verb] + [Subject] + [Infinitive Verb] + [Object]  
-   - This is a question! In Italian, yes/no questions often keep the same word order as statements.
-   - "Did you forget" → The main verb is **dimenticare**. What tense do we need?
-   - "To close the door" → The verb "to close" stays in the **infinitive** form.  
+2. **Verb Conjugation:**  
+   - The verb **"to be"** (essere) needs to be conjugated in the present tense for "the cat."  
+   - The verb **"to forget"** (dimenticare) needs to be conjugated in the past (passato prossimo). Which auxiliary verb does it take?  
 
----
+3. **Prepositions:**  
+   - What is the correct preposition for "on" in Italian? (Hint: It combines with the article.)  
 
-### **Hints & Questions**
-1. What is the correct conjugation of **essere** for "the cat" (**il gatto**) in the present tense?  
-2. Which Italian preposition do we use for "on" in "on the table"?  
-3. "Did you forget" is in the **past**. How do we form the past tense of **dimenticare**?  
-4. In Italian, direct object pronouns can sometimes be used with past participles. Can you figure out if "la porta" needs one?
+4. **Forming a Question:**  
+   - In Italian, "Did you...?" is usually expressed with the **past tense**, without an auxiliary "did." How do you structure it?  
 
 ---
 
-### **Your Task**
-Use the hints and the vocabulary table to construct the correct Italian translation of the sentence. Try it yourself before checking with a teacher or reference material.
-
-Good luck! 😊
+Try forming the sentence, and I’ll guide you through any corrections! 😊
 </assistant:output>
 </example>
