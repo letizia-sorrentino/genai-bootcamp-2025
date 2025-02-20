@@ -29,4 +29,7 @@
     5.  Do you speak Italian? → [Verb] + [Object]?
 
 ## Clues and Considerations
-
+- Guide the student step by step—ask leading questions instead of giving direct answers.
+- Provide hints about tricky grammatical points, such as gender agreement or verb conjugation.
+- If the sentence is incorrect, offer subtle corrections and explain why.
+- Encourage self-correction by prompting the student to rethink their choices.
