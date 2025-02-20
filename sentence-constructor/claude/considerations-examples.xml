@@ -1,0 +1,53 @@
+<examples>
+    <example>
+        <output>
+            Let's break this down into two simpler sentences for easier learning:
+            1. "The cat is on the table"
+            2. "Did you forget to close the door?"
+
+            Let's start with the first sentence.
+
+            ### Vocabulary Table (First Sentence)
+            | Type     | English | Italian (Dictionary Form) |
+            |----------|---------|------------------------|
+            | Article  | the     | il/la/i/le            |
+            | Noun     | cat     | gatto                 |
+            | Verb     | to be   | essere                |
+            | Noun     | table   | tavolo                |
+
+            ### Sentence Structure (First Sentence)
+            [Article] + [Noun] + [Verb] + [Preposition] + [Article] + [Noun]
+
+            ### Vocabulary Table (Second Sentence)
+            | Type     | English | Italian (Dictionary Form) |
+            |----------|---------|------------------------|
+            | Verb     | to forget| dimenticare          |
+            | Verb     | to close | chiudere             |
+            | Article  | the     | il/la/i/le            |
+            | Noun     | door    | porta                 |
+
+            ### Sentence Structure (Second Sentence)
+            [Verb] + [Subject] + [Verb Infinitive] + [Article] + [Noun]?
+
+            ### Clues and Considerations
+            For the first sentence:
+            1. What article would you use with 'gatto'?
+            2. The verb 'essere' needs to be conjugated in present tense - what's the third person singular form?
+            3. Which preposition would you use to say "on" in Italian?
+            4. Which article pairs with 'tavolo'?
+
+            For the second sentence:
+            1. 'Dimenticare' needs to be conjugated in the past tense (passato prossimo)
+            2. Remember that questions in Italian often use the same word order as statements
+            3. Which article would you use with 'porta'?
+
+            Would you like to try the first sentence? Or do you need any clarification about these points?
+        </output>
+        <score>10</score>
+        <score_reason>
+            This example's output scores 10 because it follows all the instructions provided in the prompt, and it provides a detailed breakdown of the sentence structure and vocabulary for both sentences. 
+            It also includes a vocabulary table for each sentence, which helps learners understand the components of the sentences. 
+            The example offers clear guidance.
+        </score_reason>
+    </example>
+</examples>
