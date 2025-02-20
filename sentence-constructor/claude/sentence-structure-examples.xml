@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sentence-structure-examples>
+    <example>
+        <sentence>I eat an apple.</sentence>
+        <structure>[Subject] + [Verb] + [Object]</structure>
+    </example>
+    <example>
+        <sentence>She has a dog.</sentence>
+        <structure>[Subject] + [Verb] + [Object]</structure>
+    </example>
+    <example>
+        <sentence>We go to school.</sentence>
+        <structure>[Subject] + [Verb] + [Prepositional-Phrase]</structure>
+    </example>
+    <example>
+        <sentence>They like pizza.</sentence>
+        <structure>[Subject] + [Verb] + [Object]</structure>
+    </example>
+    <example>
+        <sentence>Do you speak Italian?</sentence>
+        <structure>[Verb] + [Object]?</structure>
+    </example>
+</sentence-structure-examples>
