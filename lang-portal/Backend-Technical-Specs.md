@@ -78,59 +78,378 @@ backend_node/
 ## Database Schema
 
 ### `words` — Stores individual Italian vocabulary words.
-- `id` (Integer, Primary Key): Unique identifier for each word
-- `italian` (String, Required): the word in Italian
-- `english` (String, Required): English translation of the word
-- `parts` (JSON, Required): Word components stored in JSON format
+- `id` (Integer)
+- `italian` (String)
+- `english` (String)
+- `parts` (JSON)
 
 ### `groups` — Manages collections of words.
-- `id` (Integer, Primary Key): Unique identifier for each group
-- `name` (String, Required): Name of the group
-- `words_count` (Integer, Default: 0): Counter cache for the number of words in the group
+- `id` (Integer)
+- `name` (String)
+- `words_count` (Integer)
 
 ### `word_groups` — Join-table enabling many-to-many relationship between words and groups.
-- `id` (Integer, Primary Key): Unique identifier for each relationship
-- `word_id` (Integer, Foreign Key): References `words.id`
-- `group_id` (Integer, Foreign Key): References `groups.id`
+- `id` (Integer): 
+- `word_id` (Integer)
+- `group_id` (Integer)
 
 ### `study_activities` — Defines different types of study activities available.
-- `id` (Integer, Primary Key): Unique identifier for each activity
-- `name` (String, Required): Name of the activity (e.g., "Flashcards", "Quiz")
-- `url` (String, Required): The full URL of the study activity
+- `id` (Integer):
+- `name` (String)
+- `url` (String)
 
 ### `study_sessions` — Records individual study sessions.
-- `id` (Integer, Primary Key): Unique identifier for each session
-- `group_id` (Integer, Foreign Key): References `groups.id`
-- `study_activity_id` (Integer, Foreign Key): References `study_activities.id`
-- `created_at` (Timestamp, Default: Current Time): When the session was created
+- `id` (Integer): 
+- `group_id` (Integer) 
+- `study_activity_id` (Integer)
+- `created_at` (Timestamp)
 
 ### `word_review_items` — Tracks individual word reviews within study sessions.
-- `id` (Integer, Primary Key): Unique identifier for each review
-- `word_id` (Integer, Foreign Key): References `words.id`
-- `study_session_id` (Integer, Foreign Key): References `study_sessions.id`
-- `correct` (Boolean, Required): Whether the answer was correct
-- `created_at` (Timestamp, Default: Current Time): When the review occurred
-
-## Relationships
-- `word` belongs to `groups` through `word_groups`
-- `group` belongs to `words` through `word_groups`
-- `session` belongs to a `group`
-- `session` belongs to a `study_activity`
-- `session` has many `word_review_items`
-- `word_review_item` belongs to a `study_session`
-- `word_review_item` belongs to a `word`
-
-## Design Notes
-- All tables use auto-incrementing primary keys
-- Timestamps are automatically set on creation where applicable
-- Foreign key constraints maintain referential integrity
-- JSON storage for word parts allows flexible component storage
-- Counter cache on `groups.words_count` optimizes word counting queries
+- `id` (Integer)
+- `word_id` (Integer) 
+- `study_session_id` (Integer)
+- `correct` (Boolean) 
+- `created_at` (Timestamp)
 
 ## API Endpoints
-- `GET /words`
-- `GET /groups`
-- `GET /groups/:id`
-- `POST /study_sessions`
-- `POST /study_sessions/:id/review`
+
+## Dashboard
+
+### GET /api/dashboard/last_study_session
+Returns information about the most recent study session.
+
+**JSON Response**
+```json
+{
+  "id": 234,
+  "group_id": 567,
+  "created_at": "2025-02-25T14:35:42-05:00",
+  "study_activity_id": 890,
+  "group_name": "Food and Drinks"
+}
+```
+
+### GET /api/dashboard/study_progress
+Returns learning progress metrics. The frontend will display a progress bar indicating the ratio of completed vocabulary items to the total available vocabulary.
+
+**JSON Response**
+```json
+{
+  "total_words_studied": 2,
+  "total_available_words": 100
+}
+```
+
+### GET /api/dashboard/quick_stats
+Returns quick overview statistics.
+
+**JSON Response**
+```json
+{
+  "success_rate": 70.0,
+  "total_study_sessions": 2,
+  "total_active_groups": 3,
+  "study_streak_days": 3
+}
+```
+
+## Study Activities
+
+### GET /api/study_activities
+    - to list all activities
+    - Pagination with 50 items per page
+
+### GET /api/study_activities/:id
+
+**JSON Response**
+```json
+{
+  "id": 1,
+  "name": "Vocabulary Quiz",
+  "thumbnail_url": "https://example.com/thumbnail.jpg",
+  "description": "Practice your vocabulary with flashcards"
+}
+```
+
+### GET /api/study_activities/:id/study_sessions
+Pagination with 50 items per page
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+    "id": 456,
+    "activity_name": "Vocabulary Quiz",
+    "group_name": "Food and Drinks",
+    "start_time": "2025-02-26T17:20:23-05:00",
+    "end_time": "2025-02-26T17:30:23-05:00",
+    "review_items_count": 20
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 50,
+    "items_per_page": 10
+  }
+}
+```
+
+### POST /api/study_activities/:id/launch
+
+**Request Params**
+- group_id: integer
+- study_activity_id: integer
+
+**JSON Response**
+```json
+{ 
+  "id": 124, 
+  "group_id": 123 
+}
+```
+
+## Words
+
+### GET /api/words
+Pagination with 50 items per page
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "italian": "pomodoro",
+      "english": "tomato",
+      "correct_count": 5,
+      "wrong_count": 2
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 250,
+    "items_per_page": 50
+  }
+}
+```
+
+### GET /api/words/:id
+
+**JSON Response**
+```json
+{
+  "italian": "pomodoro",
+  "english": "tomato",
+  "stats": {
+    "correct_count": 5,
+    "wrong_count": 2
+  },
+  "groups": [
+    {
+      "id": 2,
+      "name": "Food and Drinks"
+    }
+  ]
+}
+```
+
+## Groups
+
+### GET /api/groups
+Pagination with 50 items per page
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "id": 2,
+      "name": "Food and Drinks",
+      "word_count": 20
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 10,
+    "items_per_page": 50
+  }
+}
+```
+
+### GET /api/groups/:id
+
+**JSON Response**
+```json
+{
+  "id": 2,
+  "name": "Food and Drinks",
+  "stats": {
+    "total_word_count": 20
+  }
+}
+```
+
+### GET /api/groups/:id/words
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "italian": "pomodoro",
+      "english": "tomato",
+      "correct_count": 5,
+      "wrong_count": 2
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 20,
+    "items_per_page": 50
+  }
+}
+```
+
+### GET /api/groups/:id/study_sessions
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "id": 456,
+      "activity_name": "Vocabulary Quiz",
+      "group_name": "Food and Drinks",
+      "start_time": "2025-03-08T17:20:23-05:00",
+      "end_time": "2025-03-08T17:30:23-05:00",
+      "review_items_count": 20
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 5,
+    "items_per_page": 50
+  }
+}
+```
+
+## Study Sessions
+
+### GET /api/study_sessions
+Pagination with 50 items per page
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "id": 123,
+      "activity_name": "Vocabulary Quiz",
+      "group_name": "Food and Drinks",
+      "start_time": "2025-01-08T17:20:23-05:00",
+      "end_time": "2025-01-08T17:30:23-05:00",
+      "review_items_count": 20
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 50,
+    "items_per_page": 50
+  }
+}
+```
+
+### GET /api/study_sessions/:id
+
+**JSON Response**
+```json
+{
+  "id": 456,
+  "activity_name": "Vocabulary Quiz",
+  "group_name": "Food and Drinks",
+  "start_time": "2025-02-08T17:20:23-06:00",
+  "end_time": "2025-02-08T17:30:23-06:00",
+  "review_items_count": 20
+}
+```
+
+### GET /api/study_sessions/:id/words
+Pagination with 50 items per page
+
+**JSON Response**
+```json
+{
+  "items": [
+    {
+      "italian": "pomodoro",
+      "english": "tomato",
+      "correct_count": 5,
+      "wrong_count": 2
+    }
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 20,
+    "items_per_page": 50
+  }
+}
+```
+
+## System Management
+
+### POST /api/reset_history
+
+**JSON Response**
+```json
+{
+  "success": true,
+  "message": "Study history has been reset"
+}
+```
+
+### POST /api/full_reset
+
+**JSON Response**
+```json
+{
+  "success": true,
+  "message": "System has been fully reset"
+}
+```
+
+## Word Reviews
+
+### POST /api/study_sessions/:id/words/:word_id/review
+
+**Request Params**
+- id (study_session_id): integer
+- word_id: integer
+- correct: boolean
+
+**Request Payload**
+```json
+{
+  "correct": true
+}
+```
+
+**JSON Response**
+```json
+{
+  "success": true,
+  "word_id": 1,
+  "study_session_id": 456,
+  "correct": true,
+  "created_at": "2025-02-08T17:33:07-07:00"
+}
+```
+
+## Task Runner
 
