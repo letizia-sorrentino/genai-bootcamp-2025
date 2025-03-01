@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Debug Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .endpoint {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    .options {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Debug Tool</h1>
+  
+  <div class="options">
+    <h2>API Base URL</h2>
+    <input type="text" id="apiBaseUrl" value="http://localhost:3000/api" style="width: 300px; padding: 5px;">
+    <button onclick="updateBaseUrl()">Update</button>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Test Endpoints</h2>
+    <button onclick="testEndpoint('/health')">Health</button>
+    <button onclick="testEndpoint('/words')">Words</button>
+    <button onclick="testEndpoint('/groups')">Groups</button>
+    <button onclick="testEndpoint('/study_activities')">Study Activities</button>
+    <button onclick="testEndpoint('/study_sessions')">Study Sessions</button>
+    <button onclick="testEndpoint('/dashboard')">Dashboard</button>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Response</h2>
+    <pre id="responseOutput">Click a button above to test an endpoint</pre>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Raw Fetch Test</h2>
+    <p>Test a raw fetch request to diagnose CORS or other issues:</p>
+    <button onclick="testRawFetch()">Test Raw Fetch</button>
+    <pre id="rawFetchOutput">Click the button to test</pre>
+  </div>
+  
+  <script>
+    let API_BASE_URL = 'http://localhost:3000/api';
+    
+    function updateBaseUrl() {
+      API_BASE_URL = document.getElementById('apiBaseUrl').value;
+      alert(`Base URL updated to: ${API_BASE_URL}`);
+    }
+    
+    async function testEndpoint(endpoint) {
+      const responseOutput = document.getElementById('responseOutput');
+      responseOutput.textContent = 'Testing...';
+      responseOutput.className = '';
+      
+      try {
+        console.log(`Fetching ${API_BASE_URL}${endpoint}`);
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          credentials: 'include'
+        });
+        
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        responseOutput.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+        responseOutput.className = 'success';
+      } catch (error) {
+        console.error('Fetch error:', error);
+        responseOutput.textContent = `Error: ${error.message}`;
+        responseOutput.className = 'error';
+      }
+    }
+    
+    async function testRawFetch() {
+      const rawFetchOutput = document.getElementById('rawFetchOutput');
+      rawFetchOutput.textContent = 'Testing raw fetch...';
+      
+      try {
+        // Test with a simple GET request
+        const url = `${API_BASE_URL}/health`;
+        console.log(`Raw fetch to: ${url}`);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        console.log('Raw fetch response:', response);
+        const text = await response.text();
+        console.log('Raw fetch text:', text);
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+          console.log('Parsed JSON:', data);
+        } catch (e) {
+          console.error('Failed to parse JSON:', e);
+        }
+        
+        rawFetchOutput.innerHTML = `
+          <strong>Request:</strong>
+          URL: ${url}
+          Method: GET
+          Headers: Content-Type: application/json
+          
+          <strong>Response:</strong>
+          Status: ${response.status} ${response.statusText}
+          Headers: ${Array.from(response.headers).map(h => `${h[0]}: ${h[1]}`).join('\n          ')}
+          
+          <strong>Body:</strong>
+          ${text}
+          
+          <strong>Parsed JSON:</strong>
+          ${data ? JSON.stringify(data, null, 2) : 'Not valid JSON'}
+        `;
+      } catch (error) {
+        console.error('Raw fetch error:', error);
+        rawFetchOutput.textContent = `Error: ${error.message}\n\nCheck the browser console for more details.`;
+      }
+    }
+    
+    // Log browser information
+    console.log('Browser information:', {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      vendor: navigator.vendor
+    });
+    
+    // Log CORS information
+    console.log('CORS mode supported:', 'cors' in Request.prototype);
+    console.log('Credentials mode supported:', 'credentials' in Request.prototype);
+  </script>
+</body>
+</html> 

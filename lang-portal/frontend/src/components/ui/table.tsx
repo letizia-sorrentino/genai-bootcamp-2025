@@ -25,6 +25,10 @@ export function SortableTable<T>({
   onSort,
   className 
 }: SortableTableProps<T>) {
+  // Handle undefined or null data
+  const tableData = Array.isArray(data) ? data : [];
+  const hasData = tableData.length > 0;
+
   return (
     <div className={cn("w-full overflow-auto", className)}>
       <table className="w-full border-collapse">
@@ -52,24 +56,32 @@ export function SortableTable<T>({
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr
-              key={index}
-              className="border-b hover:bg-muted/50"
-            >
-              {columns.map((column) => (
-                <td
-                  key={String(column.key)}
-                  className="p-3 text-sm"
-                >
-                  {column.render 
-                    ? column.render(item)
-                    : String(item[column.key])
-                  }
-                </td>
-              ))}
+          {hasData ? (
+            tableData.map((item, index) => (
+              <tr
+                key={index}
+                className="border-b hover:bg-muted/50"
+              >
+                {columns.map((column) => (
+                  <td
+                    key={String(column.key)}
+                    className="p-3 text-sm"
+                  >
+                    {column.render 
+                      ? column.render(item)
+                      : String(item[column.key] ?? '')
+                    }
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={columns.length} className="p-3 text-center text-sm text-muted-foreground">
+                No data available
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

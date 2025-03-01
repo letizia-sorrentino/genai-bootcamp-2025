@@ -12,8 +12,9 @@ const app = express()
 
 // Configure CORS
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  optionsSuccessStatus: 200
+  origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
+  optionsSuccessStatus: 200,
+  credentials: true
 }
 
 // Apply middleware

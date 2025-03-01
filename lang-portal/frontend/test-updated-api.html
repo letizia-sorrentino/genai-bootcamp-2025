@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Updated API Client Test</title>
+</head>
+<body>
+  <h1>Updated API Client Test</h1>
+  <p>Open the browser console to see the test results.</p>
+  <div id="results">Testing...</div>
+  
+  <script type="module">
+    // Import the test script
+    import './src/test-updated-api.ts';
+    
+    // Display results in the page after a delay
+    setTimeout(() => {
+      document.getElementById('results').innerHTML = 'Tests completed. Check console for details.';
+    }, 3000);
+  </script>
+</body>
+</html> 

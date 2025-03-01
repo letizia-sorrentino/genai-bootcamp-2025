@@ -1,68 +1,184 @@
-# Language Learning Portal - Backend
+# Italian Language Learning Portal - Backend
 
-Backend server for the Language Learning Portal built with Node.js, Express, and SQLite.
+This is the backend API for an Italian language learning web application. It provides endpoints for managing vocabulary, word groups, study activities, and tracking learning progress.
 
-## Prerequisites
+## Tech Stack
+
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web framework
+- **SQLite** - Database
+- **TypeScript** - Programming language
+
+## Database Schema
+
+The application uses SQLite as its database with the following tables:
+
+### Core Tables
+
+1. **words** - Stores Italian vocabulary words
+   - `id` - Primary key
+   - `italian` - Italian word
+   - `english` - English translation
+   - `parts` - JSON with additional information (e.g., part of speech)
+
+2. **groups** - Manages collections of words
+   - `id` - Primary key
+   - `name` - Group name
+   - `words_count` - Number of words in the group
+
+3. **word_groups** - Join table for words and groups (many-to-many)
+   - `id` - Primary key
+   - `word_id` - Foreign key to words table
+   - `group_id` - Foreign key to groups table
+
+4. **study_activities** - Available study activities
+   - `id` - Primary key
+   - `name` - Activity name
+   - `url` - URL to launch the activity
+   - `description` - Description of the activity
+
+5. **study_sessions** - Records of study sessions
+   - `id` - Primary key
+   - `group_id` - Foreign key to groups table
+   - `study_activity_id` - Foreign key to study_activities table
+   - `created_at` - Timestamp when the session was created
+
+6. **word_review_items** - Records of word reviews during study sessions
+   - `id` - Primary key
+   - `word_id` - Foreign key to words table
+   - `study_session_id` - Foreign key to study_sessions table
+   - `correct` - Whether the review was correct
+   - `created_at` - Timestamp when the review was created
+
+7. **user_preferences** - User settings and preferences
+   - `id` - Primary key
+   - `theme` - UI theme preference (light/dark)
+   - `notifications_enabled` - Whether notifications are enabled
+   - `daily_goal` - Daily study goal (number of words)
+   - `created_at` - Timestamp when the preferences were created
+   - `updated_at` - Timestamp when the preferences were last updated
+
+### System Tables
+
+1. **migrations** - Tracks applied database migrations
+   - `id` - Primary key
+   - `name` - Migration file name
+   - `applied_at` - Timestamp when the migration was applied
+
+## Getting Started
+
+### Prerequisites
 
 - Node.js (v14 or higher)
 - npm (v6 or higher)
 
-## Setup
+### Installation
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. Clone the repository
+   ```bash
+   git clone <repository-url>
+   cd lang-portal/backend
+   ```
 
-2. Create a `.env` file in the root directory:
-```bash
-PORT=3000
-NODE_ENV=development
-```
+2. Install dependencies
+   ```bash
+   npm install
+   ```
 
-## Development
+3. Create a `.env` file in the root directory with the following content:
+   ```
+   PORT=3000
+   NODE_ENV=development
+   DB_PATH=database.sqlite
+   ```
 
-Run the development server with hot reload:
+### Database Setup
+
+The application uses a migration system to manage the database schema. To set up the database:
+
+1. Run migrations to create the database schema:
+   ```bash
+   npm run migrate:run
+   ```
+
+2. Seed the database with initial data:
+   ```bash
+   npm run seed
+   ```
+
+### Running the Application
+
+To start the development server:
+
 ```bash
 npm run dev
 ```
 
-The server will start at http://localhost:3000
+The server will start on port 3000 (or the port specified in your `.env` file).
 
-## Production
+### Available Scripts
 
-1. Build the project:
+- `npm run dev` - Start the development server with hot reloading
+- `npm run build` - Build the application for production
+- `npm run start` - Start the production server
+- `npm run seed` - Seed the database with initial data
+- `npm run migrate` - Show migration help
+- `npm run migrate:create <name>` - Create a new migration file
+- `npm run migrate:run` - Run all pending migrations
+
+## Database Management
+
+### Migrations
+
+The application uses a migration system to manage database schema changes. Migration files are stored in the `src/db/migrations` directory.
+
+To create a new migration:
+
 ```bash
-npm run build
+npm run migrate:create add_new_field_to_words
 ```
 
-2. Start the production server:
+This will create a new migration file in the `src/db/migrations` directory with a timestamp prefix.
+
+To run all pending migrations:
+
 ```bash
-npm start
+npm run migrate:run
 ```
 
-## API Documentation
+### Seeding
 
-The API will be available at `/api` with the following endpoints:
+The application includes seed data for testing and development. To seed the database:
 
-- `GET /api/health` - Health check endpoint
-- `GET /api/words` - Get list of words
-- `GET /api/groups` - Get list of word groups
-- More endpoints documented in the API specification
-
-## Project Structure
-
-```
-src/
-├── controllers/   # Request handlers
-├── models/       # Database models
-├── routes/       # API routes
-├── db/           # Database setup and migrations
-├── utils/        # Helper functions
-├── app.ts        # Express app setup
-└── server.ts     # Server entry point
+```bash
+npm run seed
 ```
 
-## Database
+This will populate the database with:
+- 3 study activities
+- 6 word groups
+- 115 Italian words organized by category
+- Default user preferences
 
-The application uses SQLite3 as the database. The database file will be created automatically when you first run the server. 
+## API Endpoints
+
+The API provides endpoints for managing vocabulary, word groups, study activities, and tracking learning progress. See the [API documentation](./API.md) for details.
+
+## Error Handling
+
+The application includes a robust error handling system with custom error classes for different HTTP status codes. Errors are logged and formatted for consistent API responses.
+
+## Logging
+
+The application includes a request logger middleware that logs incoming requests and outgoing responses, including detailed information for better debugging.
+
+## Development
+
+For development, the application uses:
+- `nodemon` for hot reloading
+- `ts-node` for running TypeScript files directly
+- `dotenv` for environment variables
+
+## License
+
+This project is licensed under the ISC License. 

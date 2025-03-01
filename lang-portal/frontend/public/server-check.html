@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend Server Check</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e7f3fe;
+      border-left: 6px solid #2196F3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Backend Server Check</h1>
+  
+  <div>
+    <h2>Server Status</h2>
+    <button id="checkServer">Check Server Status</button>
+    <div id="serverStatus">Click the button to check server status</div>
+  </div>
+  
+  <div class="info">
+    <h3>CORS Information</h3>
+    <p>Your frontend is running on: <span id="frontendOrigin"></span></p>
+    <p>The backend should be configured to allow requests from this origin.</p>
+    <p>If you're seeing CORS errors, make sure the backend's CORS configuration includes this origin.</p>
+  </div>
+  
+  <div>
+    <h2>CORS Test</h2>
+    <button id="testCors">Test CORS Configuration</button>
+    <pre id="corsResult">Click the button to test CORS</pre>
+  </div>
+  
+  <script>
+    // Display the frontend origin
+    document.getElementById('frontendOrigin').textContent = window.location.origin;
+    
+    // Function to check if the server is running
+    document.getElementById('checkServer').addEventListener('click', async () => {
+      const serverStatus = document.getElementById('serverStatus');
+      serverStatus.innerHTML = 'Checking server status...';
+      
+      try {
+        // Try to connect to the server without making a CORS request
+        const startTime = Date.now();
+        const response = await fetch('http://localhost:3000', { 
+          method: 'HEAD',
+          mode: 'no-cors' // This won't trigger CORS preflight
+        });
+        const endTime = Date.now();
+        
+        // If we get here, the server is reachable
+        serverStatus.innerHTML = `
+          <p class="success">Server is running!</p>
+          <p>Response time: ${endTime - startTime}ms</p>
+        `;
+      } catch (error) {
+        // If we get an error, the server might be down
+        serverStatus.innerHTML = `
+          <p class="error">Server might be down or unreachable</p>
+          <p>Error: ${error.message}</p>
+          <p>Make sure the backend server is running on http://localhost:3000</p>
+        `;
+      }
+    });
+    
+    // Function to test CORS
+    document.getElementById('testCors').addEventListener('click', async () => {
+      const corsResult = document.getElementById('corsResult');
+      corsResult.textContent = 'Testing CORS configuration...';
+      
+      try {
+        // Make a CORS request to the health endpoint
+        const response = await fetch('http://localhost:3000/api/health', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          mode: 'cors'
+        });
+        
+        const data = await response.json();
+        
+        corsResult.innerHTML = `
+          <p class="success">CORS is configured correctly!</p>
+          <p>Status: ${response.status} ${response.statusText}</p>
+          <p>Response: ${JSON.stringify(data, null, 2)}</p>
+          <p>CORS Headers:</p>
+          <ul>
+            <li>Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin') || 'Not set'}</li>
+            <li>Access-Control-Allow-Credentials: ${response.headers.get('Access-Control-Allow-Credentials') || 'Not set'}</li>
+            <li>Access-Control-Allow-Methods: ${response.headers.get('Access-Control-Allow-Methods') || 'Not set'}</li>
+          </ul>
+        `;
+      } catch (error) {
+        corsResult.innerHTML = `
+          <p class="error">CORS Error</p>
+          <p>Error: ${error.message}</p>
+          <p>This might be a CORS configuration issue. Check the browser console for more details.</p>
+          <p>Make sure the backend server's CORS configuration includes ${window.location.origin}</p>
+        `;
+      }
+    });
+    
+    // Automatically check server status on page load
+    window.addEventListener('load', () => {
+      document.getElementById('checkServer').click();
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Connection Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .endpoint {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 20px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>API Connection Test</h1>
+  <p>This page tests the connection to the backend API.</p>
+  
+  <button id="testAll">Test All Endpoints</button>
+  
+  <div class="endpoint">
+    <h2>Health Check</h2>
+    <button onclick="testEndpoint('/api/health', 'healthResult')">Test</button>
+    <pre id="healthResult">Click Test to check the endpoint</pre>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Words</h2>
+    <button onclick="testEndpoint('/api/words', 'wordsResult')">Test</button>
+    <pre id="wordsResult">Click Test to check the endpoint</pre>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Groups</h2>
+    <button onclick="testEndpoint('/api/groups', 'groupsResult')">Test</button>
+    <pre id="groupsResult">Click Test to check the endpoint</pre>
+  </div>
+  
+  <div class="endpoint">
+    <h2>Study Activities</h2>
+    <button onclick="testEndpoint('/api/study_activities', 'activitiesResult')">Test</button>
+    <pre id="activitiesResult">Click Test to check the endpoint</pre>
+  </div>
+  
+  <script>
+    const API_BASE_URL = 'http://localhost:3000';
+    
+    async function testEndpoint(endpoint, resultElementId) {
+      const resultElement = document.getElementById(resultElementId);
+      resultElement.textContent = 'Testing...';
+      resultElement.className = '';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          credentials: 'include'
+        });
+        
+        const data = await response.json();
+        resultElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+        resultElement.className = 'success';
+      } catch (error) {
+        resultElement.textContent = `Error: ${error.message}`;
+        resultElement.className = 'error';
+      }
+    }
+    
+    document.getElementById('testAll').addEventListener('click', () => {
+      testEndpoint('/api/health', 'healthResult');
+      testEndpoint('/api/words', 'wordsResult');
+      testEndpoint('/api/groups', 'groupsResult');
+      testEndpoint('/api/study_activities', 'activitiesResult');
+    });
+  </script>
+</body>
+</html> 

@@ -129,5 +129,59 @@ export const groupsController = {
     } catch (error) {
       next(error)
     }
+  },
+  
+  // Get study sessions for a group
+  getStudySessions: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const db = await getDb()
+      const { id } = req.params
+      const page = parseInt(req.query.page as string) || 1
+      const itemsPerPage = parseInt(req.query.limit as string) || 50
+      const offset = (page - 1) * itemsPerPage
+      
+      // Check if group exists
+      const group = await db.get('SELECT id FROM groups WHERE id = ?', [id])
+      if (!group) {
+        throw new NotFoundError(`Group with ID ${id} not found`)
+      }
+      
+      // Get total count
+      const countResult = await db.get(`
+        SELECT COUNT(*) as total 
+        FROM study_sessions 
+        WHERE group_id = ?
+      `, [id])
+      const totalItems = countResult.total
+      const totalPages = Math.ceil(totalItems / itemsPerPage)
+      
+      // Get study sessions
+      const sessions = await db.all(`
+        SELECT 
+          ss.id,
+          sa.name as activity_name,
+          g.name as group_name,
+          ss.created_at as start_time,
+          ss.created_at as end_time, -- Simplified, in a real app this would be a separate field
+          (SELECT COUNT(*) FROM word_review_items WHERE study_session_id = ss.id) as review_items_count
+        FROM study_sessions ss
+        JOIN study_activities sa ON ss.study_activity_id = sa.id
+        JOIN groups g ON ss.group_id = g.id
+        WHERE ss.group_id = ?
+        ORDER BY ss.created_at DESC
+        LIMIT ? OFFSET ?
+      `, [id, itemsPerPage, offset])
+      
+      logger.debug(`Retrieved ${sessions.length} study sessions for group ${id}`)
+      
+      paginatedResponse(res, sessions, {
+        current_page: page,
+        total_pages: totalPages,
+        total_items: totalItems,
+        items_per_page: itemsPerPage
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 } 
