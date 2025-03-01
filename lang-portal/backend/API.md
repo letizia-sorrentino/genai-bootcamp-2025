@@ -1,195 +1,67 @@
-# API Documentation
+# Language Learning Portal API Documentation
 
-This document provides detailed information about the API endpoints available in the Italian Language Learning Portal backend.
+This document provides a comprehensive overview of the Language Learning Portal API endpoints.
 
 ## Base URL
 
 All API endpoints are prefixed with `/api`.
 
+## Authentication
+
+Currently, the API does not require authentication.
+
 ## Response Format
 
-All API responses follow a standard format:
+Most API responses follow a standard format:
 
 ```json
 {
   "success": true,
-  "data": { ... },
-  "message": "Optional message"
+  "data": { ... }
 }
 ```
 
-For error responses:
+For paginated responses:
+
+```json
+{
+  "success": true,
+  "data": [ ... ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 10,
+    "total_items": 500,
+    "items_per_page": 50
+  }
+}
+```
+
+## Error Handling
+
+Errors are returned in the following format:
 
 ```json
 {
   "success": false,
   "error": {
-    "code": 400,
-    "message": "Error message"
+    "message": "Error message",
+    "code": "ERROR_CODE"
   }
 }
 ```
 
-## Authentication
+## API Endpoints
 
-This API does not require authentication as it's designed for a single user.
+### Health Check
 
-## Endpoints
+#### GET /api/health
 
-### Dashboard
+Check if the API is running.
 
-#### GET /api/dashboard/last_study_session
-
-Returns information about the most recent study session.
-
-**Response**
+**Response:**
 ```json
 {
-  "success": true,
-  "data": {
-    "id": 234,
-    "group_id": 567,
-    "created_at": "2025-02-25T14:35:42-05:00",
-    "study_activity_id": 890,
-    "group_name": "Food and Drinks"
-  }
-}
-```
-
-#### GET /api/dashboard/study_progress
-
-Returns learning progress metrics.
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "total_words_studied": 2,
-    "total_available_words": 100
-  }
-}
-```
-
-#### GET /api/dashboard/quick_stats
-
-Returns quick overview statistics.
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "success_rate": 70.0,
-    "total_study_sessions": 2,
-    "total_active_groups": 3,
-    "study_streak_days": 3
-  }
-}
-```
-
-### Study Activities
-
-#### GET /api/study_activities
-
-Returns a list of all study activities.
-
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 50)
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "items": [
-      {
-        "id": 1,
-        "name": "Vocabulary Quiz",
-        "url": "http://localhost:8081",
-        "description": "Test your vocabulary knowledge with flashcards and multiple-choice questions"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 3,
-      "items_per_page": 50
-    }
-  }
-}
-```
-
-#### GET /api/study_activities/:id
-
-Returns details for a specific study activity.
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "name": "Vocabulary Quiz",
-    "url": "http://localhost:8081",
-    "description": "Test your vocabulary knowledge with flashcards and multiple-choice questions"
-  }
-}
-```
-
-#### GET /api/study_activities/:id/study_sessions
-
-Returns study sessions for a specific study activity.
-
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 50)
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "items": [
-      {
-        "id": 456,
-        "activity_name": "Vocabulary Quiz",
-        "group_name": "Food and Drinks",
-        "start_time": "2025-02-26T17:20:23-05:00",
-        "end_time": "2025-02-26T17:30:23-05:00",
-        "review_items_count": 20
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 5,
-      "total_items": 50,
-      "items_per_page": 10
-    }
-  }
-}
-```
-
-#### POST /api/study_activities/:id/launch
-
-Launches a study activity for a specific group.
-
-**Request Body**
-```json
-{
-  "group_id": 123
-}
-```
-
-**Response**
-```json
-{
-  "success": true,
-  "data": { 
-    "id": 124, 
-    "group_id": 123 
-  }
+  "status": "ok"
 }
 ```
 
@@ -197,55 +69,56 @@ Launches a study activity for a specific group.
 
 #### GET /api/words
 
-Returns a paginated list of words with review statistics.
+Get a paginated list of words.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `sort_by`: Sort field (`italian`, `english`, `correct_count`, `wrong_count`) (default: `italian`)
-- `order`: Sort order (`asc` or `desc`) (default: `asc`)
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `sort_by` (optional): Field to sort by (default: "italian")
+  - Valid values: "italian", "english", "correct_count", "wrong_count"
+- `order` (optional): Sort order (default: "asc")
+  - Valid values: "asc", "desc"
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "italian": "pomodoro",
-        "english": "tomato",
-        "correct_count": 5,
-        "wrong_count": 2
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 5,
-      "total_items": 250,
-      "items_per_page": 50
-    }
+  "data": [
+    {
+      "italian": "ciao",
+      "english": "hello",
+      "correct_count": 10,
+      "wrong_count": 2
+    },
+    ...
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 10,
+    "total_items": 500,
+    "items_per_page": 50
   }
 }
 ```
 
 #### GET /api/words/:id
 
-Returns details for a specific word.
+Get a single word by ID.
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "italian": "pomodoro",
-    "english": "tomato",
+    "italian": "ciao",
+    "english": "hello",
     "stats": {
-      "correct_count": 5,
+      "correct_count": 10,
       "wrong_count": 2
     },
     "groups": [
       {
-        "id": 2,
-        "name": "Food and Drinks"
+        "id": 1,
+        "name": "Greetings"
       }
     ]
   }
@@ -256,114 +129,259 @@ Returns details for a specific word.
 
 #### GET /api/groups
 
-Returns a paginated list of word groups with word counts.
+Get a paginated list of word groups.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `sort_by`: Sort field (`name`, `words_count`) (default: `name`)
-- `order`: Sort order (`asc` or `desc`) (default: `asc`)
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `sort_by` (optional): Field to sort by (default: "name")
+- `order` (optional): Sort order (default: "asc")
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": 2,
-        "name": "Food and Drinks",
-        "word_count": 20
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 10,
-      "items_per_page": 50
-    }
+  "data": [
+    {
+      "id": 1,
+      "name": "Greetings",
+      "description": "Common greetings in Italian",
+      "word_count": 15
+    },
+    ...
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 25,
+    "items_per_page": 50
   }
 }
 ```
 
 #### GET /api/groups/:id
 
-Returns details for a specific group.
+Get a single group by ID.
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "id": 2,
-    "name": "Food and Drinks",
-    "stats": {
-      "total_word_count": 20
-    }
+    "id": 1,
+    "name": "Greetings",
+    "description": "Common greetings in Italian",
+    "word_count": 15
   }
 }
 ```
 
 #### GET /api/groups/:id/words
 
-Returns words for a specific group.
+Get words for a specific group.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `sort_by`: Sort field (`italian`, `english`, `correct_count`, `wrong_count`) (default: `italian`)
-- `order`: Sort order (`asc` or `desc`) (default: `asc`)
-
-**Response**
+**Response:**
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "italian": "pomodoro",
-        "english": "tomato",
-        "correct_count": 5,
-        "wrong_count": 2
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 20,
-      "items_per_page": 50
-    }
-  }
+  "data": [
+    {
+      "id": 1,
+      "italian": "ciao",
+      "english": "hello"
+    },
+    ...
+  ]
 }
 ```
 
 #### GET /api/groups/:id/study_sessions
 
-Returns study sessions for a specific group.
+Get study sessions for a specific group.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 50)
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "started_at": "2023-01-01T12:00:00Z",
+      "completed_at": "2023-01-01T12:15:00Z",
+      "correct_count": 12,
+      "wrong_count": 3
+    },
+    ...
+  ]
+}
+```
 
-**Response**
+### Dashboard
+
+#### GET /api/dashboard/last_study_session
+
+Get information about the last study session.
+
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "items": [
-      {
-        "id": 456,
-        "activity_name": "Vocabulary Quiz",
-        "group_name": "Food and Drinks",
-        "start_time": "2025-03-08T17:20:23-05:00",
-        "end_time": "2025-03-08T17:30:23-05:00",
-        "review_items_count": 20
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 5,
-      "items_per_page": 50
+    "id": 42,
+    "started_at": "2023-01-01T12:00:00Z",
+    "completed_at": "2023-01-01T12:15:00Z",
+    "activity": {
+      "id": 1,
+      "name": "Flashcards"
+    },
+    "group": {
+      "id": 3,
+      "name": "Food"
+    },
+    "correct_count": 12,
+    "wrong_count": 3
+  }
+}
+```
+
+#### GET /api/dashboard/study_progress
+
+Get study progress over time.
+
+**Query Parameters:**
+- `period` (optional): Time period (default: "week")
+  - Valid values: "week", "month", "year"
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "date": "2023-01-01",
+      "correct_count": 45,
+      "wrong_count": 12,
+      "total_count": 57
+    },
+    ...
+  ]
+}
+```
+
+#### GET /api/dashboard/quick_stats
+
+Get quick statistics about the user's learning progress.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "total_words": 500,
+    "words_studied": 320,
+    "total_study_sessions": 42,
+    "total_study_time_minutes": 840,
+    "average_accuracy": 0.85
+  }
+}
+```
+
+### Study Activities
+
+#### GET /api/study_activities
+
+Get all available study activities.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Flashcards",
+      "description": "Test your vocabulary knowledge with flashcards",
+      "icon": "flashcard"
+    },
+    ...
+  ]
+}
+```
+
+#### GET /api/study_activities/:id
+
+Get a single study activity by ID.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Flashcards",
+    "description": "Test your vocabulary knowledge with flashcards",
+    "icon": "flashcard",
+    "settings": {
+      "review_mode": "italian_to_english",
+      "time_limit_seconds": 30
     }
+  }
+}
+```
+
+#### GET /api/study_activities/:id/study_sessions
+
+Get study sessions for a specific activity.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "started_at": "2023-01-01T12:00:00Z",
+      "completed_at": "2023-01-01T12:15:00Z",
+      "group": {
+        "id": 3,
+        "name": "Food"
+      },
+      "correct_count": 12,
+      "wrong_count": 3
+    },
+    ...
+  ]
+}
+```
+
+#### POST /api/study_activities/:id/launch
+
+Launch a study activity.
+
+**Request Body:**
+```json
+{
+  "group_id": 3,
+  "settings": {
+    "review_mode": "english_to_italian",
+    "word_count": 20
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "study_session_id": 43,
+    "words": [
+      {
+        "id": 5,
+        "italian": "pane",
+        "english": "bread"
+      },
+      ...
+    ]
   }
 }
 ```
@@ -372,109 +390,159 @@ Returns study sessions for a specific group.
 
 #### GET /api/study_sessions
 
-Returns a paginated list of study sessions.
+Get all study sessions.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 50)
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `sort_by` (optional): Field to sort by (default: "started_at")
+- `order` (optional): Sort order (default: "desc")
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
-  "data": {
-    "items": [
-      {
-        "id": 123,
-        "activity_name": "Vocabulary Quiz",
-        "group_name": "Food and Drinks",
-        "start_time": "2025-01-08T17:20:23-05:00",
-        "end_time": "2025-01-08T17:30:23-05:00",
-        "review_items_count": 20
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 5,
-      "total_items": 50,
-      "items_per_page": 50
-    }
+  "data": [
+    {
+      "id": 42,
+      "started_at": "2023-01-01T12:00:00Z",
+      "completed_at": "2023-01-01T12:15:00Z",
+      "activity": {
+        "id": 1,
+        "name": "Flashcards"
+      },
+      "group": {
+        "id": 3,
+        "name": "Food"
+      },
+      "correct_count": 12,
+      "wrong_count": 3
+    },
+    ...
+  ],
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 5,
+    "total_items": 42,
+    "items_per_page": 10
   }
 }
 ```
 
 #### GET /api/study_sessions/:id
 
-Returns details for a specific study session.
+Get a single study session by ID.
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "id": 456,
-    "activity_name": "Vocabulary Quiz",
-    "group_name": "Food and Drinks",
-    "start_time": "2025-02-08T17:20:23-06:00",
-    "end_time": "2025-02-08T17:30:23-06:00",
-    "review_items_count": 20
+    "id": 42,
+    "started_at": "2023-01-01T12:00:00Z",
+    "completed_at": "2023-01-01T12:15:00Z",
+    "activity": {
+      "id": 1,
+      "name": "Flashcards"
+    },
+    "group": {
+      "id": 3,
+      "name": "Food"
+    },
+    "correct_count": 12,
+    "wrong_count": 3,
+    "duration_seconds": 900
   }
 }
 ```
 
 #### GET /api/study_sessions/:id/words
 
-Returns words reviewed in a specific study session.
+Get words for a specific study session.
 
-**Query Parameters**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 50)
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5,
+      "italian": "pane",
+      "english": "bread",
+      "review_status": "correct"
+    },
+    ...
+  ]
+}
+```
 
-**Response**
+#### POST /api/study_sessions/:id/words/:word_id/review
+
+Record a word review in a study session.
+
+**Request Body:**
+```json
+{
+  "correct": true,
+  "time_taken_ms": 2500
+}
+```
+
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "items": [
-      {
-        "italian": "pomodoro",
-        "english": "tomato",
-        "correct_count": 5,
-        "wrong_count": 2
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 20,
-      "items_per_page": 50
+    "session_stats": {
+      "correct_count": 13,
+      "wrong_count": 3,
+      "remaining_words": 4
     }
   }
 }
 ```
 
-### Word Reviews
+### User Preferences
 
-#### POST /api/study_sessions/:id/words/:word_id/review
+#### GET /api/user_preferences
 
-Records a review for a word in a study session.
+Get user preferences.
 
-**Request Body**
-```json
-{
-  "correct": true
-}
-```
-
-**Response**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "word_id": 1,
-    "study_session_id": 456,
-    "correct": true,
-    "created_at": "2025-02-08T17:33:07-07:00"
+    "theme": "light",
+    "review_mode": "italian_to_english",
+    "daily_goal_minutes": 15,
+    "notifications_enabled": true
+  }
+}
+```
+
+#### PUT /api/user_preferences
+
+Update user preferences.
+
+**Request Body:**
+```json
+{
+  "theme": "dark",
+  "review_mode": "english_to_italian",
+  "daily_goal_minutes": 30,
+  "notifications_enabled": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "theme": "dark",
+    "review_mode": "english_to_italian",
+    "daily_goal_minutes": 30,
+    "notifications_enabled": false
   }
 }
 ```
@@ -483,67 +551,28 @@ Records a review for a word in a study session.
 
 #### POST /api/reset_history
 
-Resets study history.
+Reset study history while preserving words and groups.
 
-**Response**
+**Response:**
 ```json
 {
   "success": true,
-  "message": "Study history has been reset"
+  "data": {
+    "message": "Study history has been reset successfully"
+  }
 }
 ```
 
 #### POST /api/full_reset
 
-Performs a full system reset.
+Perform a full system reset (warning: deletes all data).
 
-**Response**
-```json
-{
-  "success": true,
-  "message": "System has been fully reset"
-}
-```
-
-### User Preferences
-
-#### GET /api/user_preferences
-
-Returns the user preferences.
-
-**Response**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "theme": "light",
-    "notifications_enabled": true,
-    "daily_goal": 10
-  }
-}
-```
-
-#### PUT /api/user_preferences
-
-Updates the user preferences.
-
-**Request Body**
-```json
-{
-  "theme": "dark",
-  "notifications_enabled": false,
-  "daily_goal": 15
-}
-```
-
-**Response**
-```json
-{
-  "success": true,
-  "data": {
-    "theme": "dark",
-    "notifications_enabled": false,
-    "daily_goal": 15
+    "message": "System has been fully reset successfully"
   }
 }
 ``` 

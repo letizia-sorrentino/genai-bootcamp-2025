@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 import { Navigation } from "./Navigation"
 import { Breadcrumbs } from "./Breadcrumbs"
+import { NavigationProvider } from "./navigation-context"
 
 interface LayoutProps {
   children: ReactNode
@@ -8,12 +9,19 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <Breadcrumbs />
-      <main className="container mx-auto px-4 py-6">
-        {children}
-      </main>
-    </div>
+    <NavigationProvider>
+      <div className="flex min-h-screen bg-background">
+        {/* Sidebar Navigation */}
+        <Navigation />
+        
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden">
+          <Breadcrumbs />
+          <main className="px-6 py-6 overflow-auto">
+            {children}
+          </main>
+        </div>
+      </div>
+    </NavigationProvider>
   )
 } 

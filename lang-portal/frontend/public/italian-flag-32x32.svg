@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Italian flag with a slight border and rounded corners -->
+  <rect x="1" y="1" width="30" height="30" rx="4" ry="4" fill="none" stroke="#888" stroke-width="1"/>
+  <rect x="2" y="2" width="9.33" height="28" fill="#009246"/>
+  <rect x="11.33" y="2" width="9.33" height="28" fill="#ffffff"/>
+  <rect x="20.66" y="2" width="9.33" height="28" fill="#ce2b37"/>
+</svg> 

@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fixed API Client Test</title>
+  <title>Main API Client Test</title>
 </head>
 <body>
-  <h1>Fixed API Client Test</h1>
+  <h1>Main API Client Test</h1>
   <p>Open the browser console to see the test results.</p>
   <div id="results">Testing...</div>
   
   <script type="module">
     // Import the test script
-    import './src/test-fixed-api.ts';
+    import '../../tests/ts/test-main-api.ts';
     
     // Display results in the page after a delay
     setTimeout(() => {
       document.getElementById('results').innerHTML = 'Tests completed. Check console for details.';
-    }, 3000);
+    }, 5000);
   </script>
 </body>
 </html> 

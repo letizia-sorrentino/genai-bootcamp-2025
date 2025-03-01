@@ -16,7 +16,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button asChild>
+        <Button variant="blue" asChild>
           <Link to="/study_activities" className="flex items-center">
             Start Studying
             <ArrowRight className="ml-2 h-4 w-4" />
@@ -29,7 +29,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+              <Clock className="h-5 w-5 text-blue-600" />
               Last Study Session
             </CardTitle>
           </CardHeader>
@@ -46,7 +46,7 @@ export default function Dashboard() {
                   to={`/word_groups/${lastSession.groupId}`}
                   className="mt-4 text-sm text-blue-600 hover:underline inline-flex items-center"
                 >
-                  View Group <ArrowRight className="ml-1 h-3 w-3" />
+                  View Group <ArrowRight className="ml-1 h-3 w-3 text-blue-600" />
                 </Link>
               </div>
             ) : (
@@ -56,7 +56,7 @@ export default function Dashboard() {
                   to="/study_activities"
                   className="text-blue-600 hover:underline inline-flex items-center"
                 >
-                  Start your first session <ArrowRight className="ml-1 h-3 w-3" />
+                  Start your first session <ArrowRight className="ml-1 h-3 w-3 text-blue-600" />
                 </Link>
               </div>
             )}
@@ -67,7 +67,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
+              <Activity className="h-5 w-5 text-blue-600" />
               Study Progress
             </CardTitle>
           </CardHeader>
@@ -84,7 +84,7 @@ export default function Dashboard() {
                   to="/word_groups"
                   className="text-blue-600 hover:underline inline-flex items-center"
                 >
-                  Browse word groups <ArrowRight className="ml-1 h-3 w-3" />
+                  Browse word groups <ArrowRight className="ml-1 h-3 w-3 text-blue-600" />
                 </Link>
               </div>
             )}
@@ -95,7 +95,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5" />
+              <Trophy className="h-5 w-5 text-blue-600" />
               Quick Stats
             </CardTitle>
           </CardHeader>
@@ -126,7 +126,7 @@ export default function Dashboard() {
                   to="/study_activities"
                   className="text-blue-600 hover:underline inline-flex items-center"
                 >
-                  Try an activity <ArrowRight className="ml-1 h-3 w-3" />
+                  Try an activity <ArrowRight className="ml-1 h-3 w-3 text-blue-600" />
                 </Link>
               </div>
             )}

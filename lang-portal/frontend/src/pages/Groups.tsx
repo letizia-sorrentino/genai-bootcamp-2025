@@ -22,9 +22,25 @@ export default function Groups() {
     }))
   }, [request, page, sortColumn, sortDirection])
 
+  // Add logging to debug the data
+  useEffect(() => {
+    if (groups && groups.data) {
+      console.log('Groups data received:', groups.data);
+      // Check for any invalid date values
+      groups.data.forEach(group => {
+        if (group.createdAt && isNaN(new Date(group.createdAt).getTime())) {
+          console.error('Invalid createdAt date found:', group.createdAt, 'for group:', group.name);
+        }
+        if (group.lastStudied && isNaN(new Date(group.lastStudied).getTime())) {
+          console.error('Invalid lastStudied date found:', group.lastStudied, 'for group:', group.name);
+        }
+      });
+    }
+  }, [groups]);
+
   const columns = [
     {
-      key: 'name',
+      key: 'name' as keyof WordGroup,
       header: 'Name',
       sortable: true,
       render: (group: WordGroup) => (
@@ -34,27 +50,45 @@ export default function Groups() {
       )
     },
     {
-      key: 'description',
+      key: 'description' as keyof WordGroup,
       header: 'Description',
       sortable: true
     },
     {
-      key: 'wordCount',
+      key: 'wordCount' as keyof WordGroup,
       header: 'Words',
       sortable: true
     },
     {
-      key: 'lastStudied',
+      key: 'lastStudied' as keyof WordGroup,
       header: 'Last Studied',
       sortable: true,
-      render: (group: WordGroup) => 
-        group.lastStudied ? format(new Date(group.lastStudied), 'PPp') : 'Never'
+      render: (group: WordGroup) => {
+        if (!group.lastStudied) return 'Never';
+        try {
+          const date = new Date(group.lastStudied);
+          // Check if date is valid before formatting
+          return isNaN(date.getTime()) ? 'Invalid date' : format(date, 'PPp');
+        } catch (error) {
+          console.error('Error formatting lastStudied date:', error);
+          return 'Invalid date';
+        }
+      }
     },
     {
-      key: 'createdAt',
+      key: 'createdAt' as keyof WordGroup,
       header: 'Created',
       sortable: true,
-      render: (group: WordGroup) => format(new Date(group.createdAt), 'PP')
+      render: (group: WordGroup) => {
+        try {
+          const date = new Date(group.createdAt);
+          // Check if date is valid before formatting
+          return isNaN(date.getTime()) ? 'Invalid date' : format(date, 'PP');
+        } catch (error) {
+          console.error('Error formatting createdAt date:', error);
+          return 'Invalid date';
+        }
+      }
     }
   ]
 

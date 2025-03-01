@@ -223,6 +223,19 @@ export const api = {
   getWordGroups: (params: PaginationParams = {}) => 
     fetchApi<PaginatedResponse<WordGroup>>('/groups', {
       queryParams: params
+    }).then(response => {
+      // Add logging for date fields
+      if (response && response.data) {
+        console.log('Raw word groups response:', response);
+        // Check date fields
+        response.data.forEach(group => {
+          console.log(`Group ${group.id} (${group.name}) dates:`, {
+            createdAt: group.createdAt,
+            lastStudied: group.lastStudied
+          });
+        });
+      }
+      return response;
     }),
   getWordGroup: (id: number) => 
     fetchApi<WordGroup>(`/groups/${id}`),
