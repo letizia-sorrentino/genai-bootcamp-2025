@@ -1,3 +1,6 @@
+## OPEA GenAI Comps
+'OPEA GenAI Comps' refers to the Generative AI Components (GenAIComps) developed under the Open Platform for Enterprise AI (OPEA) initiative. This open-source project provides a suite of microservices designed to facilitate the development of enterprise-grade Generative AI applications. By leveraging a service composer, these microservices can be assembled into comprehensive ‘mega-services’ tailored for real-world enterprise AI applications. Each microservice is containerised, supporting cloud-native deployment, which simplifies scaling and integration within existing infrastructures.
+
 ## Ollama
 Ollama is a lightweight framework for running open-source large language models (like Llama 3) locally on your machine. It packages model weights, configuration, and data into a single bundle called a Modelfile. Ollama offers a simple API for creating, running, and managing models, along with a library of pre-built models ready for various applications. It's considered the optimal solution for deploying large language models locally on AIPC.
 
