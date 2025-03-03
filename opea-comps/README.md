@@ -49,11 +49,13 @@ NO_PROXY=localhost LLM_ENDPOINT_PORT=9000 LLM_MODEL_ID="llama3.2:1b" docker comp
 The Ollama API is a RESTful API that allows you to interact with the Ollama service. 
 Once the Ollama server is running, we can make API calls to the [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md).
 
-
+### Checking the port 
 To check on which port ollama is running, using the following command:
 ```bash
 docker ps
 ```
+
+
 ### Download (Pull) a model
 ```bash 
 curl http://localhost:9000/api/pull -d '{
@@ -70,4 +72,35 @@ curl http://localhost:9000/api/generate -d '{
 }'
 ```
 
-## Technical Uncertainty
+### Run the Mega-Service example 
+```bash
+python app.py
+```
+
+## Making a request to the Mega-Service
+```bash
+curl -X POST http://localhost:8000/v1/example-service \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.2:1b",
+    "messages": "Hello, how are you?"
+  }' \
+  -o response.json
+```
+
+```bash
+  curl -X POST http://localhost:8000/v1/example-service \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello world!"
+      }
+    ],
+    "model": "test-model",
+    "max_tokens": 100,
+    "temperature": 0.7
+  }'
+```
+
