@@ -1,10 +1,14 @@
 import type { Express } from "express";
 import { createServer } from "http";
 import { grammarCategorySchema, type VocabularyResponse } from "@shared/schema";
-import Groq from "groq";
+import {Groq} from "groq-sdk"; 
 
 // For debugging purposes
 console.log("Starting vocabulary generator service...");
+console.log("Checking GROQ_API_KEY in routes:", {
+  exists: !!process.env.GROQ_API_KEY,
+  length: process.env.GROQ_API_KEY?.length || 0
+});
 
 // Grammar-specific prompts for better context
 const PROMPTS = {
@@ -81,49 +85,103 @@ export async function registerRoutes(app: Express) {
   app.post("/api/generate-vocabulary", async (req, res) => {
     try {
       console.log("Received vocabulary generation request");
-      const { category } = grammarCategorySchema.parse(req.body);
-      console.log("Processing grammar category:", category);
+      console.log("Request body:", req.body);
+      const { category, useAI = false } = grammarCategorySchema.parse(req.body);
+      console.log("Parsed request:", { category, useAI });
+
+      // If useAI is false, return sample response
+      if (!useAI) {
+        console.log("Using sample response");
+        const response = sampleResponses[category] || sampleResponses.nouns;
+        return res.json(response);
+      }
 
       try {
-        // Initialize Groq client within the route handler
-        if (!process.env.GROQ_API_KEY) {
+        // Only proceed with API call if useAI is true
+        console.log("Making Groq API call");
+        const apiKey = process.env.GROQ_API_KEY;
+        
+        if (!apiKey) {
           throw new Error("GROQ_API_KEY is not set");
         }
 
-        console.log("Initializing Groq client with API key length:", process.env.GROQ_API_KEY.length);
-        const groq = Groq({
-          apiKey: process.env.GROQ_API_KEY
-        });
+        console.log("Initializing Groq client");
+        // Create client using the correct instantiation pattern for the Groq SDK
+        const groq = new Groq({ apiKey });
 
-        const completion = await groq.chat.completions.create({
-          messages: [
-            {
-              role: "system",
-              content: "You are a helpful Italian language assistant. Respond only with valid JSON in the specified format."
-            },
-            {
-              role: "user",
-              content: `${PROMPTS[category]}
-              Return the response in this exact JSON format:
-              {
-                "words": [
+        // Optional: List available models to help with debugging
+        /*
+        try {
+          const models = await groq.models.list();
+          console.log("Available models:", models.data.map(m => m.id));
+        } catch (error) {
+          console.warn("Could not fetch available models:", error);
+        }
+        */
+
+        // Use the prompt that matches the requested category
+        const promptContent = PROMPTS[category] || PROMPTS.nouns;
+        
+        console.log("Sending request to Groq API");
+        // List of models to try in order of preference
+        const modelOptions = [
+          "llama3-70b-8192",
+          "claude-3-opus-20240229",
+          "mixtral-8x7b-32768",
+          "gemma-7b-it"
+        ];
+        
+        let completion;
+        let modelError;
+        
+        // Try each model until one works
+        for (const modelName of modelOptions) {
+          try {
+            console.log(`Attempting to use model: ${modelName}`);
+            completion = await groq.chat.completions.create({
+              messages: [
+                {
+                  role: "system",
+                  content: "You are an Italian language assistant. Generate vocabulary in JSON format."
+                },
+                {
+                  role: "user",
+                  content: `${promptContent} Format:
                   {
-                    "id": number (1-10),
-                    "italian": "italian word",
-                    "english": "english translation",
-                    "parts": {
-                      "part_of_speech": "${category.slice(0, -1)}"
-                    }
-                  }
-                ]
-              }`
-            }
-          ],
-          model: "mixtral-8x7b-32768",
-          temperature: 0.7,
-          max_tokens: 1000,
-          response_format: { type: "json_object" }
-        });
+                    "words": [
+                      {
+                        "id": number (1-5),
+                        "italian": "word",
+                        "english": "translation",
+                        "parts": {
+                          "part_of_speech": "${category.slice(0, -1)}"
+                        }
+                      }
+                    ]
+                  }`
+                }
+              ],
+              model: modelName,
+              temperature: 0.7,
+              max_tokens: 500,
+              response_format: { type: "json_object" }
+            });
+            
+            // If we get here, the model worked
+            console.log(`Successfully used model: ${modelName}`);
+            break;
+          } catch (error) {
+            modelError = error;
+            console.warn(`Model ${modelName} failed:`, error instanceof Error ? error.message : String(error));
+            // Continue to try the next model
+          }
+        }
+        
+        // If all models failed, throw the last error
+        if (!completion) {
+          console.error("All models failed");
+          throw modelError || new Error("Failed to use any available model");
+        }
 
         const result = completion.choices[0]?.message?.content;
 
@@ -131,7 +189,21 @@ export async function registerRoutes(app: Express) {
           throw new Error("No response from Groq API");
         }
 
-        const parsedResult = JSON.parse(result);
+        // Parse result with proper error handling
+        let parsedResult;
+        try {
+          parsedResult = JSON.parse(result);
+          
+          // Validate the structure matches expected format
+          if (!parsedResult.words || !Array.isArray(parsedResult.words)) {
+            throw new Error("Invalid response format from Groq API");
+          }
+          
+        } catch (parseError) {
+          console.error("Error parsing Groq API response:", parseError);
+          throw new Error("Failed to parse Groq API response");
+        }
+
         res.json(parsedResult);
       } catch (error) {
         console.error("Groq API error:", error);

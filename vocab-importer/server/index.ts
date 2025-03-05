@@ -1,6 +1,35 @@
+import * as dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+import { existsSync } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const envPath = resolve(dirname(__dirname), '.env');
+
+console.log('Debug environment loading:');
+console.log('Current directory:', process.cwd());
+console.log('__dirname:', __dirname);
+console.log('Looking for .env at:', envPath);
+console.log('.env file exists:', existsSync(envPath));
+
+// Load .env file from the root directory
+const result = dotenv.config({ path: envPath });
+console.log('dotenv result:', result);
+console.log('Environment variables loaded:', {
+  NODE_ENV: process.env.NODE_ENV,
+  GROQ_API_KEY: process.env.GROQ_API_KEY ? 'present' : 'missing',
+  GROQ_API_KEY_LENGTH: process.env.GROQ_API_KEY?.length || 0
+});
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+
+// Test environment variables
+console.log('Environment check:');
+console.log('GROQ_API_KEY exists:', !!process.env.GROQ_API_KEY);
+console.log('GROQ_API_KEY length:', process.env.GROQ_API_KEY?.length || 0);
 
 const app = express();
 app.use(express.json());

@@ -50,6 +50,14 @@ http://localhost:3000
 - Tailwind CSS
 - TypeScript
 
+## Screenshots
+
+### Main Application Interface
+![Vocabulary Importer Interface](./public/vocab-importer-ui.png)
+
+### Backend Terminal Output
+![Backend Terminal](./public/backend-terminal.png)
+
 ## Contributing
 
 1. Fork the repository

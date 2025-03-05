@@ -16,7 +16,8 @@ export const vocabularyResponseSchema = z.object({
 });
 
 export const grammarCategorySchema = z.object({
-  category: z.enum(['nouns', 'verbs', 'adjectives'])
+  category: z.enum(['nouns', 'verbs', 'adjectives']),
+  useAI: z.boolean().optional().default(true)
 });
 
 export type VocabularyWord = z.infer<typeof vocabularyWordSchema>;
