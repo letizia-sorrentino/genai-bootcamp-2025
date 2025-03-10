@@ -1,40 +1,111 @@
-# language-learning-assistant
-This is for the generative AI bootcamp
+# Listening Comprehension Application
 
-**Difficulty:** Level 200 *(Due to RAG implementation and multiple AWS services integration)*
+This repository contains a listening comprehension application built with Streamlit and AWS Bedrock for AI-powered responses.
 
-**Business Goal:**
-A progressive learning tool that demonstrates how RAG and agents can enhance language learning by grounding responses in real Japanese lesson content. The system shows the evolution from basic LLM responses to a fully contextual learning assistant, helping students understand both the technical implementation and practical benefits of RAG.
+## Prerequisites
+- Python 3.9+
+- AWS account
+- Required Python packages (see `requirements.txt`)
 
-**Technical Uncertainty:**
-1. How effectively can we process and structure bilingual (Japanese/English) content for RAG?
-2. What's the optimal way to chunk and embed Japanese language content?
-3. How can we effectively demonstrate the progression from base LLM to RAG to students?
-4. Can we maintain context accuracy when retrieving Japanese language examples?
-5. How do we balance between giving direct answers and providing learning guidance?
-6. What's the most effective way to structure multiple-choice questions from retrieved content?
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd <repository-directory>
+   ```
 
-**Technical Restrictions:**
-* Must use Amazon Bedrock for:
-   * API (converse, guardrails, embeddings, agents) (https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
-     * Aamzon Nova Micro for text generation (https://aws.amazon.com/ai/generative-ai/nova)
-   * Titan for embeddings
-* Must implement in Streamlit, pandas (data visualization)
-* Must use SQLite for vector storage
-* Must handle YouTube transcripts as knowledge source (YouTubeTranscriptApi: https://pypi.org/project/youtube-transcript-api/)
-* Must demonstrate clear progression through stages:
-   * Base LLM
-   * Raw transcript
-   * Structured data
-   * RAG implementation
-   * Interactive features
-* Must maintain clear separation between components for teaching purposes
-* Must include proper error handling for Japanese text processing
-* Must provide clear visualization of RAG process
-* Should work within free tier limits where possible
+2. Set up a virtual environment (recommended):
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
 
-This structure:
-1. Sets clear expectations
-2. Highlights key technical challenges
-3. Defines specific constraints
-4. Keeps focus on both learning outcomes and technical implementation
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## AWS Bedrock Setup
+
+1. Create an AWS account if you don't have one
+2. Create an IAM user with programmatic access:
+   - Sign in to AWS Management Console
+   - Navigate to IAM service
+   - Create a new user with "Programmatic access"
+   - Attach the "AmazonBedrockFullAccess" policy
+   - Save the Access Key ID and Secret Access Key
+
+3. Enable Bedrock model access:
+   - Navigate to Amazon Bedrock in AWS Console
+   - Go to "Model access" in the left sidebar
+   - Request access to the required models (e.g., amazon.nova-micro-v1:0)
+   - Accept the terms of service
+
+4. Configure AWS credentials:
+   ```bash
+   aws configure
+   ```
+   - Enter your Access Key ID and Secret Access Key
+   - Set the default region to "us-east-1" (or the region you're using)
+   - Set the output format (optional, press Enter for default)
+
+## Running the Application
+
+### Running the Backend
+
+```bash
+cd backend
+python main.py
+```
+
+### Running the Frontend (Streamlit App)
+
+```bash
+streamlit run chat.py
+```
+
+This will start the Streamlit app and open it in your default web browser. If it doesn't open automatically, you can access it at http://localhost:8501.
+
+## Troubleshooting
+
+### AWS Access Issues
+
+If you encounter this error:
+```
+Error generating response: An error occurred (AccessDeniedException) when calling the Converse operation: You don't have access to the model with the specified model ID.
+```
+
+Ensure that:
+1. You've requested access to the model in the AWS Bedrock console
+2. Your IAM user has the necessary permissions
+3. The model ID in your code matches an available model in your account
+
+### Streamlit Run Issues
+
+If you see this warning:
+```
+Warning: to view this Streamlit app on a browser, run it with the following command: streamlit run chat.py [ARGUMENTS]
+```
+
+You're trying to run a Streamlit app with Python directly. Always use `streamlit run <filename>` instead of `python <filename>`.
+
+## Project Structure
+
+- `backend/` - Backend code and API
+  - `main.py` - Backend entry point
+  - `bedrock_chat.py` - AWS Bedrock integration
+
+- `chat.py` - Streamlit frontend application
+
+## Configuration
+
+You can modify the following settings in `bedrock_chat.py`:
+
+- `MODEL_ID` - The AWS Bedrock model ID to use
+- `region_name` - AWS region (default: "us-east-1")
+
+## Additional Information
+
+For more information about:
+- [AWS Bedrock documentation](https://docs.aws.amazon.com/bedrock/)
+- [Streamlit documentation](https://docs.streamlit.io/)
