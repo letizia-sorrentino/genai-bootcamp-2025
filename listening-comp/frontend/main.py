@@ -6,7 +6,7 @@ import re
 import sys
 import os
 
-# Ensure Python recognises the parent directory (listening-comp) as part of the path
+# Ensure Python recognises the parent directory (listening-comp) as part of the pathpytho
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backend.chat import BedrockChat
