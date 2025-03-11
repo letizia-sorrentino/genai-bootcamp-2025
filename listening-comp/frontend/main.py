@@ -5,6 +5,7 @@ from collections import Counter
 import re
 import sys
 import os
+import requests
 
 # Ensure Python recognises the parent directory (listening-comp) as part of the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -252,25 +253,75 @@ def render_structured_stage():
 
 def render_rag_stage():
     """Render the RAG implementation stage"""
-    st.header("RAG System")
+    st.header("Question Generation with RAG")
     
-    # Query input
-    query = st.text_input(
-        "Test Query",
-        placeholder="Enter a question about Italian..."
+    # Topic input
+    topic = st.text_input(
+        "Topic",
+        placeholder="Enter a topic (e.g., 'verb conjugation', 'prepositions', 'articles'...)"
     )
     
-    col1, col2 = st.columns(2)
+    # Section selection (optional)
+    section_num = st.number_input("Section Number", min_value=1, value=1)
     
-    with col1:
-        st.subheader("Retrieved Context")
-        # Placeholder for retrieved contexts
-        st.info("Retrieved contexts will appear here")
+    # Generate button
+    if topic and st.button("Generate Question", type="primary"):
+        with st.spinner("Generating question..."):
+            try:
+                # Make API call to our backend
+                response = requests.post(
+                    "http://localhost:8000/api/generate-question",
+                    json={"topic": topic, "section_num": section_num}
+                )
+                
+                if response.status_code == 200:
+                    question_data = response.json()
+                    
+                    # Display the generated question
+                    st.subheader("Generated Question")
+                    st.write(question_data["question"])
+                    
+                    # Display options
+                    st.subheader("Options")
+                    selected_option = st.radio(
+                        "Choose your answer:",
+                        question_data["options"],
+                        key="question_options"
+                    )
+                    
+                    # Check answer button
+                    if st.button("Check Answer"):
+                        if selected_option == question_data["answer"]:
+                            st.success("Correct! 🎉")
+                        else:
+                            st.error("Not quite right. Try again!")
+                        
+                        # Show explanation
+                        st.info(f"Explanation: {question_data['explanation']}")
+                else:
+                    st.error(f"Error: {response.json().get('detail', 'Failed to generate question')}")
+                    
+            except Exception as e:
+                st.error(f"Error connecting to backend: {str(e)}")
+    
+    # Add some example topics
+    with st.sidebar:
+        st.markdown("### Example Topics")
+        example_topics = [
+            "verb conjugation",
+            "prepositions with cities",
+            "definite articles",
+            "plural nouns",
+            "reflexive verbs",
+            "past tense"
+        ]
         
-    with col2:
-        st.subheader("Generated Response")
-        # Placeholder for LLM response
-        st.info("Generated response will appear here")
+        st.markdown("Click any topic to try it:")
+        for topic in example_topics:
+            if st.button(topic, key=f"topic_{topic}", use_container_width=True):
+                # This will set the topic in the main input
+                st.session_state["topic"] = topic
+                st.rerun()
 
 def render_interactive_stage():
     """Render the interactive learning stage"""
