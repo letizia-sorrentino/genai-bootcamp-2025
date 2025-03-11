@@ -5,60 +5,75 @@ import os
 import re
 from config import *  # Import AWS configuration
 
+# Define base paths
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BACKEND_DIR, "data")
+TRANSCRIPTS_DIR = os.path.join(DATA_DIR, "transcripts")
+STRUCTURED_DATA_DIR = os.path.join(DATA_DIR, "structured_data")
+
 class ListeningTestExtractor:
     def __init__(self):
         self.bedrock = boto3.client('bedrock-runtime')
+        # Create output directory if it doesn't exist
+        os.makedirs(STRUCTURED_DATA_DIR, exist_ok=True)
         
-    def extract_structured_data(self, transcript: str) -> Dict:
+    def extract_structured_data(self, transcript: str) -> str:
         """
         Extract structured data from an Italian listening practice test transcript
+        and format it as a structured text
         
         Args:
             transcript (str): The transcript text to analyze
             
         Returns:
-            Dict: Structured data containing introduction, questions with answers and explanations
+            str: Formatted text with introduction and questions
         """
-         # Clean the transcript to remove unnecessary markers
+        # Clean the transcript to remove unnecessary markers
         cleaned_transcript = re.sub(r'\[Music\]', '', transcript)
 
         prompt = f"""
-        Analyze this Italian listening practice test transcript and extract the structured information.
-        The transcript follows this pattern:
-        1. An introduction explaining the test format
-        2. Multiple questions, each with:
-           - A question or scenario
-           - A correct answer (marked with "the correct answer is...")
-           - A grammatical explanation after the answer
+        Analyze this Italian listening practice test transcript and format it as a structured text.
+        The transcript should be formatted exactly like this:
 
-        Extract and format the information as a JSON object with this structure:
-        {{
-            "introduction": "The initial instructions about the test format, time limits, and rules",
-            "questions": [
-                {{
-                    "number": 1,
-                    "question": "The actual question or scenario being asked",
-                    "correct_answer": "The answer marked as correct",
-                    "explanation": "The grammatical explanation provided after the answer"
-                }}
-            ]
-        }}
+        INTRODUCTION
+        -----------
+        [Write the introduction text explaining the test format, including:
+        - This is an Italian A1 level test
+        - Number of questions (exactly 10)
+        - Time limit per question (5 seconds)
+        - That you can pause if needed]
 
-        Important rules for extraction:
-        1. The introduction should include all instructions before the first question
-        2. Each question should be numbered sequentially
-        3. The correct answer is always marked with "the correct answer is..."
-        4. The explanation usually follows immediately after the answer
-        5. Ignore any "[Music]" markers
-        6. If a question has multiple parts, combine them into a single question
-        7. Keep the original Italian text in the explanations
+        QUESTIONS
+        ---------
 
-        Example of how to identify parts:
-        - Question: "with you have five seconds"
-        - Correct answer: "belle ed interessante"
-        - Explanation: "the noun done is a feminine plural so the adjective will be belle adjectivo qualificativo primo gruppo and interesante adjectivo qualificativo secondo gruppo"
+        <question>
+        Number: [question number]
 
-        Transcript:
+        Question: [question in Italian]
+
+        Options:
+        1. [first distinct option in Italian]
+        2. [second distinct option in Italian]
+        3. [third distinct option in Italian]
+         
+        Correct answer: [the correct answer in Italian]
+            
+        Explanation: [clear explanation in English about the specific grammar rule being tested]
+        </question>
+
+        Important rules:
+        1. Format each question exactly as shown above with all sections
+        2. Create EXACTLY 10 questions, no more, no less
+        3. Keep all Italian text in Italian
+        4. Write explanations in clear English
+        5. Number questions sequentially from 1 to 10
+        6. Make sure each question has exactly 3 DIFFERENT options
+        7. Include the specific grammar point being tested in each explanation
+        8. Each question should focus on a single, clear grammar concept
+        9. Do not create questions about the video itself (like "did you like the video?")
+        10. Make sure the correct answer matches one of the three options exactly
+
+        Here's the transcript to analyze and format:
         {cleaned_transcript}
         """
 
@@ -77,99 +92,101 @@ class ListeningTestExtractor:
             
             response_body = json.loads(response['body'].read())
             
-            # Extract the completion text from the correct path in the response
             if 'output' in response_body and 'message' in response_body['output']:
-                content = response_body['output']['message']['content'][0]['text']
-                # Remove the ```json and ``` markers if present
-                content = content.replace('```json\n', '').replace('\n```', '')
-                structured_data = json.loads(content)
+                formatted_text = response_body['output']['message']['content'][0]['text']
+                return formatted_text
             else:
                 print("Unexpected response format")
-                structured_data = {
-                    "introduction": "",
-                    "questions": []
-                }
-            
-            return structured_data
+                return None
             
         except Exception as e:
             print(f"Error extracting structured data: {str(e)}")
-            return {
-                "introduction": "",
-                "questions": [],
-                "answers": []
-            }
+            return None
 
-    def save_structured_data(self, data: Dict, filename: str) -> bool:
+    def save_structured_text(self, text: str, filename: str) -> str:
         """
-        Save structured data to a JSON file
+        Save structured text to a file
         
         Args:
-            data (Dict): The structured data to save
-            filename (str): Output filename
+            text (str): The structured text to save
+            filename (str): Output filename without extension
             
         Returns:
-            bool: True if successful, False otherwise
+            str: Full path to the saved file if successful, None otherwise
         """
         try:
-            with open(f"./structured_data/{filename}.json", 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-            return True
+            output_path = os.path.join(STRUCTURED_DATA_DIR, f"{filename}_structured.txt")
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(text)
+            return output_path
         except Exception as e:
-            print(f"Error saving structured data: {str(e)}")
-            return False
+            print(f"Error saving structured text: {str(e)}")
+            return None
 
-def read_transcript(file_path: str) -> str:
+def process_transcript(transcript_path: str, output_filename: str) -> Optional[str]:
     """
-    Read transcript from a text file
+    Process a transcript file and save structured text
     
     Args:
-        file_path (str): Path to the transcript text file
+        transcript_path (str): Path to the transcript text file
+        output_filename (str): Name for the output file (without extension)
         
     Returns:
-        str: The transcript text
+        Optional[str]: Path to the saved text file if successful, None otherwise
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return f.read()
-    except Exception as e:
-        print(f"Error reading transcript file: {str(e)}")
-        return ""
-
-def process_transcript(transcript_text: str, output_filename: str) -> Optional[Dict]:
-    """
-    Process a transcript and extract structured data
-    
-    Args:
-        transcript_text (str): The transcript text to process
-        output_filename (str): Name for the output file
+        # Read transcript
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            transcript_text = f.read()
         
-    Returns:
-        Optional[Dict]: The structured data if successful, None otherwise
-    """
-    extractor = ListeningTestExtractor()
-    
-    # Extract structured data
-    structured_data = extractor.extract_structured_data(transcript_text)
-    
-    if structured_data:
-        # Save the structured data
-        if extractor.save_structured_data(structured_data, output_filename):
-            print(f"Structured data saved successfully to {output_filename}.json")
-            return structured_data
+        # Extract and save structured text
+        extractor = ListeningTestExtractor()
+        structured_text = extractor.extract_structured_data(transcript_text)
+        
+        if structured_text:
+            output_path = extractor.save_structured_text(structured_text, output_filename)
+            if output_path:
+                print(f"Structured text saved successfully to {output_path}")
+                return output_path
+            else:
+                print("Failed to save structured text")
+                return None
         else:
-            print("Failed to save structured data")
+            print("Failed to extract structured text")
             return None
-    else:
-        print("Failed to extract structured data")
+            
+    except Exception as e:
+        print(f"Error processing transcript: {str(e)}")
         return None
 
 if __name__ == "__main__":
-    # Read transcript from file
-    transcript_path = "./transcripts/listening_test_1.txt" 
-    transcript_text = read_transcript(transcript_path)
+    # Create necessary directories
+    os.makedirs(TRANSCRIPTS_DIR, exist_ok=True)
+    os.makedirs(STRUCTURED_DATA_DIR, exist_ok=True)
     
-    if transcript_text:
-        result = process_transcript(transcript_text, "listening_test_1")
-    else:
-        print("Failed to read transcript file")
+    # Check if transcripts directory exists
+    if not os.path.exists(TRANSCRIPTS_DIR):
+        print(f"Error: Directory {TRANSCRIPTS_DIR} does not exist")
+        exit(1)
+    
+    # Get all txt files in the directory
+    transcript_files = [f for f in os.listdir(TRANSCRIPTS_DIR) if f.endswith('.txt')]
+    
+    if not transcript_files:
+        print(f"No transcript files found in {TRANSCRIPTS_DIR}")
+        exit(1)
+        
+    print(f"Found {len(transcript_files)} transcript file(s)")
+    
+    # Process each transcript file
+    for transcript_file in transcript_files:
+        print(f"\nProcessing {transcript_file}...")
+        transcript_path = os.path.join(TRANSCRIPTS_DIR, transcript_file)
+        output_filename = os.path.splitext(transcript_file)[0]  # Remove .txt extension
+        
+        output_path = process_transcript(transcript_path, output_filename)
+        
+        if output_path:
+            print(f"Successfully processed {transcript_file}. Output saved to: {output_path}")
+        else:
+            print(f"Failed to process {transcript_file}")

@@ -1,0 +1,28 @@
+{
+  "video_id": "test",
+  "section_num": 1,
+  "questions": [
+    {
+      "number": 1,
+      "question": "Qual è il plurale di 'bella' e 'interessante'?",
+      "options": [
+        "belle e interessanti",
+        "bella e interessante",
+        "belli e interessanti"
+      ],
+      "answer": "belle e interessanti",
+      "explanation": "The noun 'donne' is feminine plural, so the adjective must also be in the feminine plural form."
+    },
+    {
+      "number": 2,
+      "question": "Qual è il verbo corretto per 'loro costruiscono'?",
+      "options": [
+        "costruire",
+        "costruiscono",
+        "costruiamo"
+      ],
+      "answer": "costruiscono",
+      "explanation": "We need to use the third plural person 'loro' of the present tense of the verb 'costruire'."
+    }
+  ]
+}

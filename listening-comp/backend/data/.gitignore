@@ -1,0 +1,10 @@
+# Vector database files
+vector_db/
+
+# Ignore SQLite files in case they appear elsewhere
+*.sqlite3
+
+# Ignore any temporary or system files
+.DS_Store
+__pycache__/
+*.pyc 

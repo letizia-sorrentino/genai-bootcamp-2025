@@ -1,0 +1,156 @@
+INTRODUCTION
+-----------
+This is an Italian A1 level test. You will have exactly 10 questions to answer, each within a 5-second time limit. If you need more time, you can pause the video. Let's start.
+
+QUESTIONS
+---------
+
+<question>
+Number: 1
+
+Question: Qual è il plurale di "bella" e "interessante"?
+
+Options:
+1. belle e interessanti
+2. bello e interessanti
+3. belle e interesante
+
+Correct answer: belle e interessanti
+
+Explanation: The noun "donne" is a feminine plural, so the adjective must also be in the feminine plural form. "Bella" becomes "belle" (adjective qualificativo primo gruppo) and "interessante" becomes "interessanti" (adjective qualificativo secondo gruppo).
+</question>
+
+<question>
+Number: 2
+
+Question: Qual è il verbo corretto per "loro costruiscono"?
+
+Options:
+1. costruiscono
+2. costruiscono
+3. costruiscono
+
+Correct answer: costruiscono
+
+Explanation: We need to use the third plural person "loro" of the present tense of the verb "costruire". The conjugation follows the rule of verbs ending in "ire", specifically those in "isc" like "pulire", "capire", "finire". The full conjugation is "costruiscono".
+</question>
+
+<question>
+Number: 3
+
+Question: Qual è la frase corretta per "Le mele piacciono"?
+
+Options:
+1. Le mele piacciono
+2. Le mele piace
+3. Le mele piacciono a noi
+
+Correct answer: Le mele piacciono
+
+Explanation: We use "piacciono" because the subject "le mele" is plural. The correct form is "Le mele piacciono".
+</question>
+
+<question>
+Number: 4
+
+Question: Qual è l'articolo corretto per "porteria del mare"?
+
+Options:
+1. Amo i porteria del mare
+2. Amo la porteria del mare
+3. Amo le porteria del mare
+
+Correct answer: Amo la porteria del mare
+
+Explanation: We use "la" with nouns starting with "s" plus consonant "z", "p", "g", "n", "y" and vowel. "Porteria" is feminine singular, so we need to use "la".
+</question>
+
+<question>
+Number: 5
+
+Question: Qual è l'articolo corretto per "animali"?
+
+Options:
+1. Amo i animali
+2. Amo li animali
+3. Amo le animali
+
+Correct answer: Amo li animali
+
+Explanation: "Animali" is masculine plural starting with the vowel "a", so we need to use "li".
+</question>
+
+<question>
+Number: 6
+
+Question: Qual è la forma riflessiva corretta per "lavare"?
+
+Options:
+1. Si lava
+2. Si lavare
+3. Si lavarsi
+
+Correct answer: Si lava
+
+Explanation: In this case, we use the reflexive form of the verb "lavare" which is "si lava".
+</question>
+
+<question>
+Number: 7
+
+Question: Qual è l'articolo corretto per "pena" e "zaino"?
+
+Options:
+1. Una pena e uno zaino
+2. Una pena e un zaino
+3. Un pena e un zaino
+
+Correct answer: Una pena e un zaino
+
+Explanation: We use "una" with "pena" because it is feminine singular. We use "un" with "zaino" because it starts with "z". We also use "un" with nouns starting with "s" plus consonant "p", "g", "n", "y".
+</question>
+
+<question>
+Number: 8
+
+Question: Qual è il pronome corretto per "computer"?
+
+Options:
+1. Lo
+2. La
+3. L'
+
+Correct answer: Lo
+
+Explanation: We use the direct pronoun "lo" that replaces "a computer".
+</question>
+
+<question>
+Number: 9
+
+Question: Qual è la forma corretta del passato prossimo per "Dante è nato a Firenze"?
+
+Options:
+1. Dante è nato a Firenze
+2. Dante è nato a Firenze
+3. Dante è nato a Firenze
+
+Correct answer: Dante è nato a Firenze
+
+Explanation: We need to use the passato prossimo of the verb "nascere" in the third singular person. The auxiliary is "essere" and the past participle is "nato".
+</question>
+
+<question>
+Number: 10
+
+Question: Qual è la preposizione corretta per "Luca vive a Parigi"?
+
+Options:
+1. Luca vive a Parigi
+2. Luca vive in Parigi
+3. Luca vive a Parigi
+
+Correct answer: Luca vive a Parigi
+
+Explanation: We usually use the preposition "a" with cities and small islands. The preposition "in" is used with nations, regions, continents, and big islands.
+</question>

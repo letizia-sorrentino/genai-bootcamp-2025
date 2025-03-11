@@ -1,9 +1,14 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from typing import Optional, List, Dict
+import os
 
+# Define base paths
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BACKEND_DIR, "data")
+TRANSCRIPTS_DIR = os.path.join(DATA_DIR, "transcripts")
 
 class YouTubeTranscriptDownloader:
-    def __init__(self, languages: List[str] = ["ja", "en"]):
+    def __init__(self, languages: List[str] = ["it", "en"]):
         self.languages = languages
 
     def extract_video_id(self, url: str) -> Optional[str]:
@@ -59,7 +64,10 @@ class YouTubeTranscriptDownloader:
         Returns:
             bool: True if successful, False otherwise
         """
-        filename = f"./transcripts/{filename}.txt"
+        # Create transcripts directory if it doesn't exist
+        os.makedirs(TRANSCRIPTS_DIR, exist_ok=True)
+        
+        filename = os.path.join(TRANSCRIPTS_DIR, f"{filename}.txt")
         
         try:
             with open(filename, 'w', encoding='utf-8') as f:
@@ -94,7 +102,6 @@ def main(video_url, print_transcript=False):
         print("Failed to get transcript")
 
 if __name__ == "__main__":
-    # video_id = "https://www.youtube.com/watch?v=sY7L5cfCWno&list=PLkGU7DnOLgRMl-h4NxxrGbK-UdZHIXzKQ"  # Extract from URL: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     video_id = "https://www.youtube.com/watch?v=Swh_RM8TzkI"
     transcript = main(video_id, print_transcript=True)
         
