@@ -1,7 +1,7 @@
 import json
 from typing import Dict, List, Optional
 import boto3
-from vector_store import QuestionVectorStore
+from backend.vector_store import QuestionVectorStore
 
 class RAGQuestionGenerator:
     def __init__(self):

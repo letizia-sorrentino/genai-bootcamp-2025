@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict
-from rag import RAGQuestionGenerator
+from backend.rag import RAGQuestionGenerator
 
 app = FastAPI(title="Italian Learning Question Generator")
 

@@ -10,7 +10,7 @@ import requests
 # Ensure Python recognises the parent directory (listening-comp) as part of the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from backend.backend.chat import BedrockChat
+from backend.chat import BedrockChat
 
 
 # Page config
