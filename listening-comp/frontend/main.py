@@ -6,6 +6,7 @@ import re
 import sys
 import os
 import requests
+import tempfile
 
 # Ensure Python recognises the parent directory (listening-comp) as part of the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -360,7 +361,39 @@ def render_interactive_stage():
                 
                 # Display question
                 st.subheader("Practice Question")
-                st.write(current_question["question"])
+                
+                # Audio controls
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    st.write(current_question["question"])
+                with col2:
+                    if st.button("🔊 Listen"):
+                        try:
+                            with st.spinner("Generating audio..."):
+                                # Get audio file
+                                audio_response = requests.get(
+                                    f"http://localhost:8000/api/question-audio/{current_question['id']}",
+                                    stream=True
+                                )
+                                
+                                if audio_response.status_code == 200:
+                                    # Save audio to temporary file
+                                    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as f:
+                                        for chunk in audio_response.iter_content(chunk_size=8192):
+                                            if chunk:
+                                                f.write(chunk)
+                                        
+                                        # Play audio using st.audio
+                                        st.audio(f.name, format='audio/mp3')
+                                else:
+                                    error_detail = audio_response.json().get('detail', 'Unknown error')
+                                    st.error(f"Failed to generate audio: {error_detail}")
+                                    if "ffmpeg is not installed" in error_detail:
+                                        st.info("Please install ffmpeg to enable audio generation:\n```brew install ffmpeg```")
+                                    elif "Failed to initialize AWS clients" in error_detail:
+                                        st.info("Please configure your AWS credentials to enable audio generation.")
+                        except Exception as e:
+                            st.error(f"Error playing audio: {str(e)}")
                 
                 # Display options
                 if "options" in current_question:

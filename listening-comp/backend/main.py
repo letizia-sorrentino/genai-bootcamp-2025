@@ -1,9 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, List
 from backend.rag import RAGQuestionGenerator
 from backend.question_store import QuestionStore
+from backend.audio_generator import AudioGenerator
 
 app = FastAPI(title="Italian Learning Question Generator")
 
@@ -19,6 +21,7 @@ app.add_middleware(
 # Initialize services
 question_generator = RAGQuestionGenerator()
 question_store = QuestionStore()
+audio_generator = AudioGenerator()
 
 class QuestionRequest(BaseModel):
     topic: str
@@ -75,6 +78,31 @@ async def get_practice_question(question_id: str) -> Dict:
             detail="Question not found"
         )
     return question
+
+@app.get("/api/question-audio/{question_id}")
+async def get_question_audio(question_id: str):
+    """Get or generate audio for a specific question"""
+    # Get the question
+    question = question_store.get_question(question_id)
+    if not question:
+        raise HTTPException(
+            status_code=404,
+            detail="Question not found"
+        )
+    
+    try:
+        # Generate audio file
+        audio_file = audio_generator.generate_question_audio(question)
+        return FileResponse(
+            audio_file,
+            media_type="audio/mpeg",
+            filename=f"question_{question_id}.mp3"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate audio: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn
