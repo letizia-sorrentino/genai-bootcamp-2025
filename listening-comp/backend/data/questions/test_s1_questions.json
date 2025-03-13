@@ -15,9 +15,9 @@
     },
     {
       "number": 2,
-      "question": "Qual è il verbo corretto per 'loro costruiscono'?",
+      "question": "Qual è la coniugazione corretta del verbo 'costruire' se il soggetto è 'loro'?",
       "options": [
-        "costruire",
+        "costruisco",
         "costruiscono",
         "costruiamo"
       ],

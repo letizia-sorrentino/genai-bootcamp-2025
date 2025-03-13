@@ -330,28 +330,84 @@ def render_interactive_stage():
     # Practice type selection
     practice_type = st.selectbox(
         "Select Practice Type",
-        ["Dialogue Practice", "Vocabulary Quiz", "Listening Exercise"]
+        ["Question Practice", "Dialogue Practice", "Vocabulary Quiz", "Listening Exercise"]
     )
     
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.subheader("Practice Scenario")
-        # Placeholder for scenario
-        st.info("Practice scenario will appear here")
+    if practice_type == "Question Practice":
+        # Section selection
+        st.subheader("Select Section")
+        selected_section = st.selectbox(
+            "Section",
+            ["All Sections"]
+        )
         
-        # Placeholder for multiple choice
-        options = ["Option 1", "Option 2", "Option 3", "Option 4"]
-        selected = st.radio("Choose your answer:", options)
-        
-    with col2:
-        st.subheader("Audio")
-        # Placeholder for audio player
-        st.info("Audio will appear here")
-        
-        st.subheader("Feedback")
-        # Placeholder for feedback
-        st.info("Feedback will appear here")
+        # Initialize question index in session state if not exists
+        if 'question_index' not in st.session_state:
+            st.session_state.question_index = 0
+            
+        # Fetch questions from backend
+        try:
+            # Only fetch from practice-questions endpoint which includes fallback questions
+            response = requests.get("http://localhost:8000/api/practice-questions")
+            
+            all_questions = []
+            if response.status_code == 200:
+                all_questions = response.json()
+            
+            if all_questions:
+                # Get current question
+                current_question = all_questions[st.session_state.question_index]
+                
+                # Display question
+                st.subheader("Practice Question")
+                st.write(current_question["question"])
+                
+                # Display options
+                if "options" in current_question:
+                    options = current_question["options"]
+                    if isinstance(options, str):
+                        options = options.split(",")
+                    
+                    # Create radio buttons for options
+                    selected_option = st.radio(
+                        "Select your answer:",
+                        options,
+                        key="answer_selection"
+                    )
+                    
+                    # Check answer button
+                    if st.button("Check Answer"):
+                        if selected_option == current_question["answer"]:
+                            st.success("🎉 Correct! Well done!")
+                            st.info(f"Explanation: {current_question['explanation']}")
+                        else:
+                            st.error("❌ Not quite right. Try again!")
+                            if st.button("Show Explanation"):
+                                st.info(f"Explanation: {current_question['explanation']}")
+                
+                # Navigation
+                col1, col2, col3 = st.columns([1, 2, 1])
+                
+                with col1:
+                    if st.button("⬅️ Previous") and st.session_state.question_index > 0:
+                        st.session_state.question_index -= 1
+                        st.rerun()
+                
+                with col2:
+                    st.write(f"Question {st.session_state.question_index + 1} of {len(all_questions)}")
+                
+                with col3:
+                    if st.button("Next ➡️") and st.session_state.question_index < len(all_questions) - 1:
+                        st.session_state.question_index += 1
+                        st.rerun()
+                
+            else:
+                st.warning("No questions available. Try generating some questions first!")
+                
+        except Exception as e:
+            st.error(f"Error connecting to backend: {str(e)}")
+    else:
+        st.info("This practice type is not implemented yet.")
 
 def main():
     render_header()

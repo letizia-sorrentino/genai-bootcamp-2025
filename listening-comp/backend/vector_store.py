@@ -377,6 +377,48 @@ class QuestionVectorStore:
                     
         except Exception as e:
             print(f"Error inspecting database: {str(e)}")
+    
+    def get_all_questions(self) -> List[Dict]:
+        """Get all questions from the vector store"""
+        try:
+            # Get all entries from the collection
+            results = self.collection.get()
+            
+            # Group by question_id to reconstruct full questions
+            questions = {}
+            for i, doc_id in enumerate(results['ids']):
+                metadata = results['metadatas'][i]
+                content = results['documents'][i]
+                
+                if metadata['type'] == 'question':
+                    question_id = metadata['question_id']
+                    if question_id not in questions:
+                        questions[question_id] = {
+                            'question': content,
+                            'options': [],
+                            'section_num': metadata.get('section_num', 1)
+                        }
+                elif metadata['type'] == 'answer':
+                    question_id = metadata['question_id']
+                    if question_id in questions:
+                        questions[question_id]['answer'] = content
+                elif metadata['type'] == 'explanation':
+                    question_id = metadata['question_id']
+                    if question_id in questions:
+                        questions[question_id]['explanation'] = content
+                
+            # Convert to list and ensure all required fields are present
+            complete_questions = []
+            for question_id, question_data in questions.items():
+                if all(key in question_data for key in ['question', 'options', 'answer', 'explanation']):
+                    question_data['id'] = question_id
+                    complete_questions.append(question_data)
+            
+            return complete_questions
+            
+        except Exception as e:
+            print(f"Error getting questions from vector store: {str(e)}")
+            return []
 
 if __name__ == "__main__":
     # Initialize the vector database
