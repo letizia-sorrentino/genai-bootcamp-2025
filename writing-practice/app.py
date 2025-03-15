@@ -59,7 +59,7 @@ if 'uploaded_image' not in st.session_state:
 def fetch_words(group_id):
     """Fetch Italian words with English translations from API"""
     try:
-        st.write(f"Fetching words from: {API_URL}/{group_id}/words")  # Debug log
+        print(f"Fetching words from: {API_URL}/{group_id}/words")  # Debug log
         response = requests.get(f"{API_URL}/{group_id}/words")
         response.raise_for_status()
         data = response.json()
@@ -70,8 +70,8 @@ def fetch_words(group_id):
         else:
             words = []
             
-        st.write(f"Raw API response: {data}")  # Debug log
-        st.write(f"Received {len(words) if words else 0} words")  # Debug log
+        print(f"Raw API response: {data}")  # Debug log
+        print(f"Received {len(words) if words else 0} words")  # Debug log
         
         if not words:
             st.warning("No words received from API, using default word set")
@@ -95,7 +95,7 @@ def fetch_words(group_id):
             st.warning("Received words in unexpected format, using default word set")
             return DEFAULT_WORDS
             
-        st.write(f"Formatted words: {formatted_words}")  # Debug log
+        print(f"Formatted words: {formatted_words}")  # Debug log
         return formatted_words
     except requests.exceptions.RequestException as e:
         st.warning(f"Error fetching words from API: {e}. Using default word set.")
@@ -276,11 +276,11 @@ def on_submit_clicked():
     st.session_state.app_state = "review"
 
 # Main UI
-st.title("Italian Language Practice")
+st.title("Italian Writing Practice")
 
 # Setup State
 if st.session_state.app_state == "setup":
-    st.write("Welcome to your Italian language practice!")
+    st.write("Welcome to your Italian writing practice!")
     st.write("Press the button below to generate a practice sentence.")
     
     st.button("Generate Sentence", on_click=on_generate_clicked)
