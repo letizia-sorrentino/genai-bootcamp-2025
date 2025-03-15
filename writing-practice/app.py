@@ -14,8 +14,27 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-API_URL = "http://localhost:5000/api/groups"
+API_URL = "http://localhost:3000/api/groups"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+# Default words to use when API is not available
+DEFAULT_WORDS = [
+    {"italian": "ciao", "english": "hello"},
+    {"italian": "grazie", "english": "thank you"},
+    {"italian": "sì", "english": "yes"},
+    {"italian": "no", "english": "no"},
+    {"italian": "per favore", "english": "please"},
+    {"italian": "prego", "english": "you are welcome"},
+    {"italian": "scusa", "english": "excuse me"},
+    {"italian": "buongiorno", "english": "good morning"},
+    {"italian": "buonasera", "english": "good evening"},
+    {"italian": "arrivederci", "english": "goodbye"},
+    {"italian": "come stai", "english": "how are you"},
+    {"italian": "bene", "english": "well"},
+    {"italian": "male", "english": "bad"},
+    {"italian": "aiuto", "english": "help"},
+    {"italian": "per piacere", "english": "please"}
+]
 
 # Initialize OpenAI client
 if OPENAI_API_KEY:
@@ -40,12 +59,50 @@ if 'uploaded_image' not in st.session_state:
 def fetch_words(group_id):
     """Fetch Italian words with English translations from API"""
     try:
-        response = requests.get(f"{API_URL}/{group_id}/raw")
+        st.write(f"Fetching words from: {API_URL}/{group_id}/words")  # Debug log
+        response = requests.get(f"{API_URL}/{group_id}/words")
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        
+        # Extract words from the items array in the response
+        if isinstance(data, dict) and 'items' in data:
+            words = data['items']
+        else:
+            words = []
+            
+        st.write(f"Raw API response: {data}")  # Debug log
+        st.write(f"Received {len(words) if words else 0} words")  # Debug log
+        
+        if not words:
+            st.warning("No words received from API, using default word set")
+            return DEFAULT_WORDS
+            
+        # Format words according to database schema
+        formatted_words = []
+        for word in words:
+            if isinstance(word, dict):
+                # Extract required fields, with fallbacks
+                italian = word.get('italian', '')
+                english = word.get('english', '')
+                
+                if italian and english:  # Only add if we have both translations
+                    formatted_words.append({
+                        'italian': italian,
+                        'english': english
+                    })
+        
+        if not formatted_words:
+            st.warning("Received words in unexpected format, using default word set")
+            return DEFAULT_WORDS
+            
+        st.write(f"Formatted words: {formatted_words}")  # Debug log
+        return formatted_words
     except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching words: {e}")
-        return []
+        st.warning(f"Error fetching words from API: {e}. Using default word set.")
+        return DEFAULT_WORDS
+    except Exception as e:
+        st.warning(f"Unexpected error processing words: {e}. Using default word set.")
+        return DEFAULT_WORDS
 
 def generate_sentence(word):
     """Generate an Italian sentence using the provided word"""
@@ -171,17 +228,22 @@ def grade_attempt(original_english, transcribed_italian, translation):
 # Button callbacks
 def on_generate_clicked():
     if not st.session_state.italian_english_words:
+        st.write("Fetching new words...")  # Debug log
         group_id = "1"  # Default group ID
-        st.session_state.italian_english_words = fetch_words(group_id)
-        if not st.session_state.italian_english_words:
-            st.error("No words fetched. Please check if the API is running.")
+        words = fetch_words(group_id)
+        if not words:
+            st.error("Failed to fetch words. Please check if the API is running and the group exists.")
             return
+        st.session_state.italian_english_words = words
     
     # Pick a random word
-    random_word = random.choice(st.session_state.italian_english_words)
-    st.session_state.current_sentence = generate_sentence(random_word)
-    st.session_state.app_state = "practice"
-    st.session_state.uploaded_image = None
+    if st.session_state.italian_english_words:
+        random_word = random.choice(st.session_state.italian_english_words)
+        st.session_state.current_sentence = generate_sentence(random_word)
+        st.session_state.app_state = "practice"
+        st.session_state.uploaded_image = None
+    else:
+        st.error("No words available to generate a sentence.")
 
 def on_submit_clicked():
     if st.session_state.uploaded_image is None:
@@ -225,10 +287,12 @@ if st.session_state.app_state == "setup":
 
 # Practice State
 elif st.session_state.app_state == "practice":
-    st.subheader("Translate to Italian:")
+    st.write("### Your Practice Sentence")
+    st.info(f"Translate to Italian: **{st.session_state.current_sentence['english']}**")
+    st.caption(f"Focus word: *{st.session_state.current_sentence['focus_word']['italian']}* ({st.session_state.current_sentence['focus_word']['english']})")
     
-    st.info(st.session_state.current_sentence["english"])
-    st.caption(f"Focus word: {st.session_state.current_sentence['focus_word']['italian']} ({st.session_state.current_sentence['focus_word']['english']})")
+    st.write("### Your Answer")
+    st.write("Write your translation on paper, take a photo, and upload it here:")
     
     uploaded_file = st.file_uploader("Upload your handwritten Italian translation", type=["jpg", "jpeg", "png"])
     
@@ -238,13 +302,13 @@ elif st.session_state.app_state == "practice":
         
         # Display image preview
         image = Image.open(uploaded_file)
-        st.image(image, caption="Preview", width=400)
+        st.image(image, caption="Preview of your handwritten answer", width=400)
         
         st.button("Submit for Review", on_click=on_submit_clicked)
-        
+
 # Review State
 elif st.session_state.app_state == "review":
-    st.subheader("Review:")
+    st.write("### Review")
     
     col1, col2 = st.columns(2)
     
@@ -258,10 +322,9 @@ elif st.session_state.app_state == "review":
         st.info(st.session_state.grade_results["submission"]["transcription"])
         st.success(st.session_state.grade_results["submission"]["translation"])
     
-    st.subheader("Grading:")
-    
-    # Display grade with colored box
+    st.write("### Grading")
     grade = st.session_state.grade_results["submission"]["grade"]
+    feedback = st.session_state.grade_results["submission"]["feedback"]
     
     # Define grade colors
     grade_colors = {
@@ -273,19 +336,19 @@ elif st.session_state.app_state == "review":
         "F": "#F44336",  # Red
     }
     
-    # Get the color for the grade (default to gray if not found)
-    grade_color = grade_colors.get(grade.upper(), "#9E9E9E")
+    # Get color for the grade (default to gray if not found)
+    grade_color = grade_colors.get(grade, "#9E9E9E")
     
-    # Create a simple colored box with the grade
+    # Display grade with colored box
     st.markdown(
         f"""
         <div style="display:flex;align-items:center;margin-bottom:20px">
             <div style="background-color:{grade_color};color:white;width:50px;height:50px;
                 border-radius:50%;text-align:center;line-height:50px;font-weight:bold;
                 font-size:1.5rem;margin-right:15px">
-                {grade.upper()}
+                {grade}
             </div>
-            <div>{st.session_state.grade_results["submission"]["feedback"]}</div>
+            <div>{feedback}</div>
         </div>
         """,
         unsafe_allow_html=True
