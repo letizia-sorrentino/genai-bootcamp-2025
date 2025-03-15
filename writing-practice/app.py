@@ -54,6 +54,8 @@ if 'grade_results' not in st.session_state:
     st.session_state.grade_results = None
 if 'uploaded_image' not in st.session_state:
     st.session_state.uploaded_image = None
+if 'cached_sentences' not in st.session_state:
+    st.session_state.cached_sentences = {}
 
 # Functions
 def fetch_words(group_id):
@@ -106,45 +108,44 @@ def fetch_words(group_id):
 
 def generate_sentence(word):
     """Generate an Italian sentence using the provided word"""
+    # Check cache first
+    if word['italian'] in st.session_state.cached_sentences:
+        print(f"Using cached sentence for: {word['italian']}")
+        return st.session_state.cached_sentences[word['italian']]
+        
     prompt = f"""
     Generate a simple Italian sentence using the word: {word['italian']}.
-
-    - The sentence should follow A1-level Italian grammar, using:
-      - Basic subject-verb-object structures (e.g., "Io mangio la pizza.")
-      - Common present-tense verbs (e.g., "mangiare," "bere," "andare")
-      - Basic adjectives and adverbs for more natural sentences (e.g., "buono," "velocemente")
-      - Simple negation (e.g., "Non ho un cane.")
-    - The sentence should be between 4-8 words long for simplicity.
-    - Do not use complex tenses or idiomatic expressions.
-
-    Example Outputs:
-    - "Io bevo il caffè."
-    - "Domani vado a scuola."
-    - "Luca mangia una mela rossa."
-    
-    Return only the Italian sentence without additional explanations.
+    The sentence should be A1-level, 4-8 words, present tense only.
+    Use basic subject-verb-object structure.
+    Return only the Italian sentence, no explanations.
     """
     
     try:
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=50  # Limit response length
         )
         italian_sentence = completion.choices[0].message.content.strip().strip('"')
         
         # Get English translation of the sentence
-        translation_prompt = f"Translate this Italian sentence to English: '{italian_sentence}'"
+        translation_prompt = f"Translate to English: '{italian_sentence}'"
         translation_completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": translation_prompt}]
+            messages=[{"role": "user", "content": translation_prompt}],
+            max_tokens=50  # Limit response length
         )
         english_translation = translation_completion.choices[0].message.content.strip().strip('"')
         
-        return {
+        result = {
             "italian": italian_sentence,
             "english": english_translation,
             "focus_word": word
         }
+        
+        # Cache the result
+        st.session_state.cached_sentences[word['italian']] = result
+        return result
     except Exception as e:
         st.error(f"Error generating sentence: {e}")
         return {
@@ -165,11 +166,13 @@ def transcribe_image(image):
 
 def translate_text(text):
     """Translate Italian text to English"""
-    prompt = f"Translate this Italian text to English as literally as possible: '{text}'"
+    prompt = f"Translate to English briefly: '{text}'"
     try:
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=50,  # Limit response length
+            temperature=0.3  # More consistent translations
         )
         return completion.choices[0].message.content.strip()
     except Exception as e:
@@ -179,33 +182,20 @@ def translate_text(text):
 def grade_attempt(original_english, transcribed_italian, translation):
     """Grade the user's attempt using LLM"""
     prompt = f"""
-    Grade this Italian language learning attempt:
-    
-    Original English Sentence: "{original_english}"
-    Student's Written Italian (transcribed): "{transcribed_italian}"
-    Literal Translation of Student's Italian: "{translation}"
-    
-    Please grade using the S Rank system:
-    - S: Perfect match in meaning with proper grammar
-    - A: Excellent meaning match with minor grammatical errors
-    - B: Good meaning match with some grammatical errors
-    - C: Basic meaning conveyed but with significant errors
-    - D: Some relevant words but incorrect meaning
-    - F: Completely incorrect or incomprehensible
-    
-    Provide:
-    1. The letter grade
-    2. A brief explanation of whether the attempt was accurate and suggestions for improvement
-    
-    Format your response as:
-    Grade: [letter]
-    Feedback: [explanation and suggestions]
+    Grade this Italian translation:
+    English: "{original_english}"
+    Italian: "{transcribed_italian}"
+    Translation: "{translation}"
+    Grade A-F only, brief feedback.
+    Format: Grade: [letter]\\nFeedback: [1 sentence]
     """
     
     try:
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=100,  # Limit response length
+            temperature=0.3  # More consistent grading
         )
         result = completion.choices[0].message.content.strip()
         
