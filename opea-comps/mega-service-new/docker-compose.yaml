@@ -1,0 +1,31 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+services:
+  llm-server:
+    image: ollama/ollama
+    container_name: llm-server
+    ports:
+      - ${LLM_SERVICE_PORT:-9000}:11434
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      LLM_MODEL_ID: ${LLM_MODEL_ID}
+      host_ip: ${host_ip}
+
+  grading-server:
+    image: ollama/ollama
+    container_name: grading-server
+    ports:
+      - ${GRADING_SERVICE_PORT:-9001}:11434
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      LLM_MODEL_ID: ${LLM_MODEL_ID}
+      host_ip: ${host_ip}
+
+networks:
+  default:
+    driver: bridge
