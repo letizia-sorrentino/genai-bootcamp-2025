@@ -6,6 +6,7 @@ __pycache__/
 env/
 venv/
 .venv/
+.venv311/
 ENV/
 .env/
 *.env
@@ -36,3 +37,30 @@ Thumbs.db
 # Optional (if Docker is used)
 *.dockerignore
 Dockerfile
+
+# Python virtual environment
+.venv/
+.venv311/
+venv/
+ENV/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# Output files
+output/cache/*
+!output/cache/.gitkeep
