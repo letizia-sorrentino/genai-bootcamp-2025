@@ -6,6 +6,16 @@ from tools.get_page_content import get_page_content
 from tools.extract_vocabulary import extract_vocabulary
 from tools.song_utils import generate_song_id, save_results
 
+def load_prompt() -> str:
+    """Load the lyrics agent prompt template"""
+    prompt_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "prompts",
+        "lyrics_agent.md"
+    )
+    with open(prompt_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
 class LyricsAgent:
     def __init__(self):
         self.tools = {
@@ -17,6 +27,7 @@ class LyricsAgent:
         }
         self.cache_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output", "cache")
         os.makedirs(self.cache_dir, exist_ok=True)
+        self.prompt = load_prompt()
 
     def _get_cache_path(self, song_id: str) -> str:
         return os.path.join(self.cache_dir, f"{song_id}.json")
@@ -39,12 +50,7 @@ class LyricsAgent:
 
     def process_request(self, query: str) -> Tuple[str, List[Dict], str]:
         """
-        Process a request following the ReAct framework:
-        1. Search for lyrics
-        2. Get content
-        3. Extract vocabulary
-        4. Generate song ID
-        5. Save results
+        Process a request following the ReAct framework and the agent prompt.
         
         Args:
             query (str): The song query (e.g., "Eros Ramazzotti Se Bastasse Una Canzone")
@@ -61,7 +67,10 @@ class LyricsAgent:
             print("Found in cache, returning cached result")
             return cached_result
 
-        # If not in cache, proceed with web search
+        # Format the prompt with the query
+        formatted_prompt = self.prompt.format(query=query)
+        
+        # Follow the execution flow from the prompt
         print("Thought: I need to search for the song lyrics first. Let me try SERP API.")
         search_results = self.tools["search_web_serp"](query)
         

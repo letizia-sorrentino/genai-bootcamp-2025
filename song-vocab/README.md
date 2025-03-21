@@ -158,6 +158,84 @@ Using the Swagger UI:
 - Interactive API documentation
 - CORS enabled for cross-origin requests
 
+## Technical Details
+
+### Application Architecture
+
+The application follows a modular architecture with the following components:
+
+1. **FastAPI Server** (main.py)
+   - Handles HTTP requests and responses
+   - Validates request/response formats
+   - Manages CORS and middleware
+   - Provides API documentation
+
+2. **LyricsAgent** (core/agent.py)
+   - Main orchestrator coordinating all operations
+   - Implements the ReAct framework
+   - Manages caching and result storage
+   - Follows a structured execution flow:
+     1. Generate song ID
+     2. Check cache
+     3. Search for lyrics
+     4. Extract content
+     5. Extract vocabulary
+     6. Save results
+
+3. **Tools**
+   - `search_web_serp`: Searches for song lyrics using DuckDuckGo
+   - `get_page_content`: Extracts content from web pages
+   - `extract_vocabulary`: Uses Mistral model to extract Italian vocabulary
+   - `generate_song_id`: Creates URL-safe IDs for songs
+   - `save_results`: Saves results to files and database
+
+### Processing Flow
+
+1. **Request Processing**:
+   ```
+   User Request → FastAPI → LyricsAgent → Tools → Response
+   ```
+
+2. **Lyrics Retrieval**:
+   - Primary source: DuckDuckGo search for Italian lyrics
+   - Fallback sources:
+     - Direct Google search
+     - Default lyrics websites (azlyrics.com, musixmatch.com)
+   - Content extraction from web pages
+   - Validation of Italian content
+
+3. **Vocabulary Extraction**:
+   - Uses Mistral 7B model via Ollama
+   - Extracts:
+     - Italian words
+     - English translations
+     - Parts of speech
+     - Word IDs
+   - Implements retry logic for reliability
+   - Validates extracted vocabulary
+
+4. **Error Handling**:
+   - Web search fallbacks
+   - Vocabulary extraction validation
+   - Cache management
+   - HTTP error responses
+   - Logging and debugging
+
+5. **Caching System**:
+   - File-based caching in `output/cache`
+   - Cache invalidation strategy
+   - Performance optimization
+   - Storage management
+
+### Dependencies
+
+- **Web Framework**: FastAPI
+- **LLM**: Mistral 7B via Ollama
+- **Search**: DuckDuckGo API
+- **Database**: SQLite
+- **Web Scraping**: BeautifulSoup
+- **Documentation**: Swagger UI/OpenAPI
+
 ## Project Structure
 
 ```

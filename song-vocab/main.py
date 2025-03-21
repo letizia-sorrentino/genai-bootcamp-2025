@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Any
 from core.agent import LyricsAgent
 
 app = FastAPI(title="Italian Song Vocabulary API")
@@ -21,14 +21,16 @@ agent = LyricsAgent()
 class MessageRequest(BaseModel):
     message_request: str
 
+class VocabularyWord(BaseModel):
+    id: int
+    italian: str
+    english: str
+    parts: Dict[str, str]
+
 class Response(BaseModel):
     lyrics: str
-    vocabulary: List[Dict[str, any]]  # List of words with id, italian, english, and parts fields
+    vocabulary: List[VocabularyWord]
     song_id: str
-
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
 
 @app.get("/")
 async def root():
@@ -46,6 +48,7 @@ async def get_lyrics(message_request: MessageRequest):
             song_id=song_id
         )
     except Exception as e:
+        print(f"Error processing request: {str(e)}")  # Add logging
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

@@ -21,6 +21,6 @@ You have access to the following tools:
 **Example interaction:**  
 
 Thought: I need to search for the song lyrics first. Let me try SERP API.  
-Tool: search_web_serp(query="Eros Ramazzotti Se Bastasse Una Canzone lyrics")  
+Tool: search_web_serp(query="{query} lyrics")  
 
-Thought: Got search results. Now I need to extract the content
+Thought: Got search results. Now I need to extract the content.
