@@ -1,0 +1,54 @@
+.flashcard-deck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.deck-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.nav-button {
+  background-color: #2a7d8b;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.nav-button:hover:not(:disabled) {
+  background-color: #1f5f6a;
+}
+
+.nav-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.card-counter {
+  font-size: 1.1rem;
+  color: #666;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .deck-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .nav-button {
+    width: 100%;
+  }
+} 

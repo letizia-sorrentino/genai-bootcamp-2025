@@ -1,0 +1,288 @@
+{
+  "categories": [
+    {
+      "id": "greetings",
+      "name": "Greetings",
+      "description": "Common Italian greetings and expressions",
+      "words": [
+        {
+          "word": "ciao",
+          "translation": "hello/goodbye",
+          "example": "Ciao, come stai?",
+          "pronunciation": "ˈtʃao"
+        },
+        {
+          "word": "buongiorno",
+          "translation": "good morning",
+          "example": "Buongiorno, signore!",
+          "pronunciation": "bwɔnˈdʒorno"
+        },
+        {
+          "word": "arrivederci",
+          "translation": "goodbye",
+          "example": "Arrivederci, a presto!",
+          "pronunciation": "arːiveˈdertʃi"
+        },
+        {
+          "word": "salve",
+          "translation": "hello (formal)",
+          "example": "Salve, signora!",
+          "pronunciation": "ˈsalve"
+        },
+        {
+          "word": "buonasera",
+          "translation": "good evening",
+          "example": "Buonasera, come sta?",
+          "pronunciation": "bwɔnaˈsera"
+        }
+      ]
+    },
+    {
+      "id": "numbers",
+      "name": "Numbers",
+      "description": "Basic Italian numbers",
+      "words": [
+        {
+          "word": "uno",
+          "translation": "one",
+          "example": "Ho un gatto",
+          "pronunciation": "ˈuno"
+        },
+        {
+          "word": "due",
+          "translation": "two",
+          "example": "Ho due cani",
+          "pronunciation": "ˈdue"
+        },
+        {
+          "word": "tre",
+          "translation": "three",
+          "example": "Sono le tre",
+          "pronunciation": "tre"
+        },
+        {
+          "word": "quattro",
+          "translation": "four",
+          "example": "Ho quattro fratelli",
+          "pronunciation": "ˈkwattro"
+        },
+        {
+          "word": "cinque",
+          "translation": "five",
+          "example": "Sono le cinque",
+          "pronunciation": "ˈtʃinkwe"
+        }
+      ]
+    },
+    {
+      "id": "colors",
+      "name": "Colors",
+      "description": "Common Italian colors",
+      "words": [
+        {
+          "word": "rosso",
+          "translation": "red",
+          "example": "La mela è rossa",
+          "pronunciation": "ˈrosso"
+        },
+        {
+          "word": "blu",
+          "translation": "blue",
+          "example": "Il cielo è blu",
+          "pronunciation": "blu"
+        },
+        {
+          "word": "verde",
+          "translation": "green",
+          "example": "L'erba è verde",
+          "pronunciation": "ˈverde"
+        },
+        {
+          "word": "giallo",
+          "translation": "yellow",
+          "example": "Il sole è giallo",
+          "pronunciation": "ˈdʒallo"
+        },
+        {
+          "word": "nero",
+          "translation": "black",
+          "example": "La notte è nera",
+          "pronunciation": "ˈnero"
+        }
+      ]
+    },
+    {
+      "id": "food",
+      "name": "Food",
+      "description": "Common Italian food items",
+      "words": [
+        {
+          "word": "pizza",
+          "translation": "pizza",
+          "example": "Mi piace la pizza margherita",
+          "pronunciation": "ˈpittsa"
+        },
+        {
+          "word": "pasta",
+          "translation": "pasta",
+          "example": "La pasta è pronta",
+          "pronunciation": "ˈpasta"
+        },
+        {
+          "word": "gelato",
+          "translation": "ice cream",
+          "example": "Vorrei un gelato",
+          "pronunciation": "dʒeˈlato"
+        },
+        {
+          "word": "caffè",
+          "translation": "coffee",
+          "example": "Vorrei un caffè",
+          "pronunciation": "kafˈfɛ"
+        },
+        {
+          "word": "vino",
+          "translation": "wine",
+          "example": "Un bicchiere di vino rosso",
+          "pronunciation": "ˈvino"
+        }
+      ]
+    },
+    {
+      "id": "animals",
+      "name": "Animals",
+      "description": "Common Italian animals",
+      "words": [
+        {
+          "word": "gatto",
+          "translation": "cat",
+          "example": "Il gatto dorme",
+          "pronunciation": "ˈɡatto"
+        },
+        {
+          "word": "cane",
+          "translation": "dog",
+          "example": "Il cane abbaia",
+          "pronunciation": "ˈkane"
+        },
+        {
+          "word": "uccello",
+          "translation": "bird",
+          "example": "L'uccello vola",
+          "pronunciation": "utˈtʃello"
+        },
+        {
+          "word": "leone",
+          "translation": "lion",
+          "example": "Il leone ruggisce",
+          "pronunciation": "leˈone"
+        },
+        {
+          "word": "elefante",
+          "translation": "elephant",
+          "example": "L'elefante è grande",
+          "pronunciation": "eleˈfante"
+        }
+      ]
+    },
+    {
+      "id": "family",
+      "name": "Family",
+      "description": "Family-related vocabulary",
+      "words": [
+        {
+          "word": "madre",
+          "translation": "mother",
+          "example": "Mia madre cucina bene",
+          "pronunciation": "ˈmadre"
+        },
+        {
+          "word": "padre",
+          "translation": "father",
+          "example": "Mio padre lavora",
+          "pronunciation": "ˈpadre"
+        },
+        {
+          "word": "sorella",
+          "translation": "sister",
+          "example": "Mia sorella studia",
+          "pronunciation": "soˈrella"
+        },
+        {
+          "word": "fratello",
+          "translation": "brother",
+          "example": "Mio fratello gioca",
+          "pronunciation": "fraˈtello"
+        },
+        {
+          "word": "nonna",
+          "translation": "grandmother",
+          "example": "Mia nonna cucina",
+          "pronunciation": "ˈnonna"
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Travel",
+      "description": "Travel-related vocabulary",
+      "words": [
+        {
+          "word": "aeroporto",
+          "translation": "airport",
+          "example": "L'aeroporto è lontano",
+          "pronunciation": "aeroˈporto"
+        },
+        {
+          "word": "hotel",
+          "translation": "hotel",
+          "example": "L'hotel è in centro",
+          "pronunciation": "oˈtɛl"
+        },
+        {
+          "word": "biglietto",
+          "translation": "ticket",
+          "example": "Ho il biglietto per Roma",
+          "pronunciation": "biʎˈʎetto"
+        },
+        {
+          "word": "valigia",
+          "translation": "suitcase",
+          "example": "La mia valigia è pesante",
+          "pronunciation": "vaˈlidʒa"
+        },
+        {
+          "word": "passaporto",
+          "translation": "passport",
+          "example": "Ho dimenticato il passaporto",
+          "pronunciation": "passaˈporto"
+        }
+      ]
+    },
+    {
+      "id": "common-phrases",
+      "name": "Common Phrases",
+      "description": "Common Italian phrases",
+      "words": [
+        {
+          "word": "grazie",
+          "translation": "thank you",
+          "example": "Grazie mille!",
+          "pronunciation": "ˈɡrattsje"
+        },
+        {
+          "word": "prego",
+          "translation": "you're welcome",
+          "example": "Prego, di niente!",
+          "pronunciation": "ˈpreɡo"
+        },
+        {
+          "word": "scusa",
+          "translation": "sorry/excuse me",
+          "example": "Scusa, non ho capito",
+          "pronunciation": "ˈskuza"
+        }
+      ]
+    }
+  ]
+} 

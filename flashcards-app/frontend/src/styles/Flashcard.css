@@ -1,0 +1,96 @@
+.flashcard {
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+  background: #f8f9fa;
+}
+
+.word,
+.translation {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2a7d8b;
+  margin-bottom: 1rem;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+.loading-spinner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #2a7d8b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .flashcard {
+    height: 250px;
+  }
+  
+  .word,
+  .translation {
+    font-size: 1.5rem;
+  }
+  
+  .image-container {
+    height: 150px;
+  }
+} 

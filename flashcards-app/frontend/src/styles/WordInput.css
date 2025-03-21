@@ -1,0 +1,62 @@
+.word-input-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.input-group {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.word-input {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.2s;
+}
+
+.word-input:focus {
+  outline: none;
+  border-color: #2a7d8b;
+  box-shadow: 0 0 0 2px rgba(42, 125, 139, 0.2);
+}
+
+.word-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.submit-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: white;
+  background-color: #2a7d8b;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #1f5f6a;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .submit-button {
+    width: 100%;
+  }
+} 
