@@ -1,6 +1,6 @@
-# Running the Mega Service
+# Setting Up the Mega Service
 
-This guide provides step-by-step instructions for running the mega service. For detailed information about the service architecture and components, please refer to the README.md file.
+This guide provides step-by-step instructions for setting up and running the mega service. For detailed information about the service architecture and components, please refer to the README.md file.
 
 ## Prerequisites
 
@@ -91,4 +91,6 @@ curl -X POST http://localhost:8000/v1/chat \
 3. If mega service fails to start:
    - Ensure all environment variables are set correctly
    - Check if Python dependencies are installed (`pip install -r requirements.txt`)
-   - Verify ports 8000, 9002, and 9003 are available 
+   - Verify ports 8000, 9002, and 9003 are available
+
+For more detailed error information and known issues, please refer to ERROR_LOG.md. 
