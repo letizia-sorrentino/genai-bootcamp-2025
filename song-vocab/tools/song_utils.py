@@ -2,7 +2,7 @@ import os
 import json
 import re
 from typing import List, Dict
-from ..core.database import Database
+from core.database import Database
 
 # Initialize database
 db = Database()

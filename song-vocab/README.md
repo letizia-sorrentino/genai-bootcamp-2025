@@ -1,109 +1,217 @@
-# Italian Song Vocabulary Extractor
+# Italian Song Vocabulary API
 
-A FastAPI application that extracts Italian vocabulary from song lyrics. The application follows a ReAct framework to search for Italian songs, extract their lyrics, and generate a structured vocabulary list with translations.
+This API extracts Italian vocabulary from song lyrics, providing translations and parts of speech for each word.
+
+![API Documentation Interface](docs/swagger-ui.png)
+
+The API provides a modern, interactive documentation interface powered by Swagger UI (OpenAPI 3.1). The documentation includes:
+- Complete endpoint specifications
+- Request/response schemas
+- Interactive testing capabilities
+- Validation error handling
+
+## Installation
+
+### Python Environment Setup
+
+1. Install Python 3.11:
+```bash
+# Install pyenv if you haven't already
+brew install pyenv
+
+# Add pyenv to your shell
+echo 'eval "$(pyenv init --path)"' >> ~/.zshrc
+echo 'eval "$(pyenv init -)"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install Python 3.11.7
+pyenv install 3.11.7
+
+# Set local Python version for the project
+cd song-vocab
+pyenv local 3.11.7
+```
+
+2. Create Virtual Environment:
+```bash
+# Create and activate virtual environment
+python3.11 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create output directories
+mkdir -p output/cache
+```
+
+### Ollama Setup
+
+1. Install Ollama:
+```bash
+brew install ollama
+```
+
+2. Start Ollama Service:
+```bash
+# Start as a background service (recommended)
+brew services start ollama
+
+# Or run directly without background service
+/opt/homebrew/opt/ollama/bin/ollama serve
+```
+
+3. Pull Required Model:
+```bash
+ollama pull mistral:7b
+```
+
+4. Verify Installation:
+```bash
+ollama --version
+```
+
+## Running the Application
+
+1. Ensure Ollama service is running:
+```bash
+# Check if Ollama is running
+brew services list | grep ollama
+```
+
+2. Start the FastAPI application:
+```bash
+# Make sure you're in the project directory and virtual environment is activated
+cd song-vocab
+source .venv/bin/activate
+
+# Start the server
+python main.py
+```
+
+The API will be available at http://127.0.0.1:8000
+
+## API Documentation
+
+You can access the interactive API documentation at:
+- Swagger UI: http://127.0.0.1:8000/docs
+- ReDoc: http://127.0.0.1:8000/redoc
+
+### Endpoints
+
+#### 1. Root Endpoint
+- **URL**: `/`
+- **Method**: GET
+- **Response**: Welcome message
+
+#### 2. Agent Endpoint
+- **URL**: `/api/agent`
+- **Method**: POST
+- **Content-Type**: application/json
+- **Request Body**:
+```json
+{
+    "message_request": "Artist Name Song Title"
+}
+```
+- **Response**:
+```json
+{
+    "lyrics": "Song lyrics in Italian",
+    "vocabulary": [
+        {
+            "id": 1,
+            "italian": "word",
+            "english": "translation",
+            "parts": {
+                "type": "part_of_speech"
+            }
+        }
+    ],
+    "song_id": "artist-name-song-title"
+}
+```
+
+## Example Usage
+
+Using curl:
+```bash
+curl -X POST http://127.0.0.1:8000/api/agent \
+  -H "Content-Type: application/json" \
+  -d '{"message_request": "Eros Ramazzotti Se Bastasse Una Canzone"}'
+```
+
+Using the Swagger UI:
+1. Open http://127.0.0.1:8000/docs
+2. Click on the `/api/agent` endpoint
+3. Click "Try it out"
+4. Enter your request in the format shown above
+5. Click "Execute"
 
 ## Features
 
-- 🔍 Search for Italian song lyrics using SERP API
-- 📝 Extract full lyrics from web pages
-- 📚 Generate comprehensive vocabulary lists with:
-  - Italian words
-  - English translations
-  - Parts of speech
-  - Word types
-- 💾 Save results in both text and JSON formats
-- 🗄️ SQLite database for persistent storage
-- 🚀 Rate-limited API endpoints
-- 🔄 Caching for efficient vocabulary extraction
+- Extracts Italian vocabulary from song lyrics
+- Provides English translations
+- Identifies parts of speech
+- Caches results for faster subsequent requests
+- Stores results in SQLite database
+- Interactive API documentation
+- CORS enabled for cross-origin requests
 
 ## Project Structure
 
 ```
 song-vocab/
-├── main.py              # FastAPI application entry point
-├── core/               # Core application components
-│   ├── __init__.py
-│   ├── agent.py        # ReAct framework implementation
-│   └── database.py     # Database operations
-├── tools/              # Utility tools
-│   ├── __init__.py
-│   ├── search_web.py   # Web search functionality
-│   ├── get_page_content.py  # Web page content extraction
-│   ├── extract_vocabulary.py  # Vocabulary extraction
-│   └── song_utils.py   # File operations and song ID generation
-├── prompts/            # LLM prompts
-│   ├── lyrics_agent.md # Main agent prompt
-│   └── vocabulary_extraction.md  # Vocabulary extraction prompt
-├── output/            # Generated content
-│   ├── cache/        # Cached vocabulary results
-│   ├── *_lyrics.txt  # Song lyrics files
-│   └── *_vocabulary.json  # Vocabulary JSON files
-└── requirements.txt   # Python dependencies
+├── core/
+│   ├── agent.py      # Main agent logic
+│   └── database.py   # Database operations
+├── tools/
+│   ├── search_web.py         # Web search functionality
+│   ├── get_page_content.py   # Web page content extraction
+│   ├── extract_vocabulary.py # Vocabulary extraction
+│   └── song_utils.py         # Utility functions
+├── prompts/
+│   └── vocabulary_extraction.md  # LLM prompt
+├── output/
+│   └── cache/        # Cached results
+├── main.py           # FastAPI application
+└── requirements.txt  # Project dependencies
 ```
 
-## Installation
+## Troubleshooting
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd song-vocab
-```
+### Common Issues
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+1. **Python Version Issues**
+   - Ensure you're using Python 3.11.7
+   - Check version with `python --version`
+   - If needed, reactivate virtual environment: `source .venv/bin/activate`
 
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. **Ollama Service Issues**
+   - Check if service is running: `brew services list | grep ollama`
+   - Restart service: `brew services restart ollama`
+   - Check logs: `tail -f /opt/homebrew/var/log/ollama.log`
 
-4. Start the Ollama service (required for LLM functionality):
-```bash
-ollama serve
-```
+3. **Port Conflicts**
+   - If port 8000 is in use, kill the process:
+   ```bash
+   lsof -i :8000
+   kill -9 <PID>
+   ```
 
-5. Run the application:
-```bash
-python main.py
-```
+### Installation Details
+- Python Version: 3.11.7
+- Ollama Version: 0.6.2
+- Ollama Location: `/opt/homebrew/Cellar/ollama/0.6.2`
+- Ollama Size: 26.2MB
+- Default Ollama Port: 11434
+- API Port: 8000
 
-## API Usage
-
-### Endpoint: POST /api/agent
-
-Search for an Italian song and extract its vocabulary.
-
-**Request:**
-```json
-{
-    "message_request": "Eros Ramazzotti Se Bastasse Una Canzone"
-}
-```
-
-**Response:**
-```json
-{
-    "lyrics": "Se bastasse una canzone...",
-    "vocabulary": [
-        {
-            "id": 1,
-            "italian": "se",
-            "english": "if",
-            "parts": {"type": "conjunction"}
-        },
-        {
-            "id": 2,
-            "italian": "bastasse",
-            "english": "were enough",
-            "parts": {"type": "verb"}
-        }
-    ],
-    "song_id": "eros-ramazzotti-se-bastasse-una-canzone"
-}
-```
+### Notes
+- The Ollama installation includes automatic cleanup of old versions
+- To disable automatic cleanup, set `HOMEBREW_NO_INSTALL_CLEANUP`
+- Keep the virtual environment activated while working on the project
+- The API documentation is available at http://127.0.0.1:8000/docs
 
 ## Data Storage
 
