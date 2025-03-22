@@ -25,10 +25,7 @@ Generates flashcards for all words in a given category.
   "flashcards": [
     {
       "word": "ciao",
-      "translation": "hello/goodbye",
-      "imageUrl": "https://example.com/images/ciao.jpg",
-      "example": "Ciao, come stai?",
-      "pronunciation": "tʃaʊ"
+      "translation": "hello/goodbye"
     },
     // ... more flashcards
   ]
@@ -44,7 +41,7 @@ Generates flashcards for all words in a given category.
 ```
 
 ### 2. Get Categories
-Retrieves all available vocabulary categories.
+Retrieves all available vocabulary categories, including user's favorites.
 
 **Endpoint:** `GET /categories`
 
@@ -53,71 +50,137 @@ Retrieves all available vocabulary categories.
 {
   "categories": [
     {
+      "id": "favorites",
+      "name": "Favorites",
+      "description": "Your favorite words",
+      "words": [
+        {
+          "word": "ciao",
+          "translation": "hello/goodbye",
+          "example": "Ciao, come stai?",
+          "pronunciation": "tʃaʊ"
+        }
+      ]
+    },
+    {
       "id": "greetings",
       "name": "Greetings",
       "description": "Common greetings and expressions"
     },
+    // ... other categories
+  ]
+}
+```
+
+### 3. Get Specific Category
+Retrieves details for a specific category.
+
+**Endpoint:** `GET /categories/:categoryId`
+
+**Parameters:**
+- `categoryId`: The ID of the category to retrieve
+
+**Response:**
+```json
+{
+  "id": "greetings",
+  "name": "Greetings",
+  "description": "Common greetings and expressions",
+  "words": [
     {
-      "id": "numbers",
-      "name": "Numbers",
-      "description": "Basic numbers and counting"
-    },
-    {
-      "id": "colors",
-      "name": "Colors",
-      "description": "Basic colors"
-    },
-    {
-      "id": "food",
-      "name": "Food",
-      "description": "Food and beverage vocabulary"
-    },
-    {
-      "id": "animals",
-      "name": "Animals",
-      "description": "Common animal names"
-    },
-    {
-      "id": "family",
-      "name": "Family",
-      "description": "Family members and relationships"
-    },
-    {
-      "id": "travel",
-      "name": "Travel",
-      "description": "Travel-related vocabulary"
-    },
-    {
-      "id": "common-phrases",
-      "name": "Common Phrases",
-      "description": "Everyday useful phrases"
+      "word": "ciao",
+      "translation": "hello/goodbye",
+      "example": "Ciao, come stai?",
+      "pronunciation": "tʃaʊ"
     }
   ]
 }
 ```
 
-### 3. Get Example Words
-Retrieves example words for a specific category.
+### 4. Get Words by Category
+Retrieves all words for a specific category.
 
-**Endpoint:** `GET /example-words/:category`
+**Endpoint:** `GET /words/:categoryId`
 
 **Parameters:**
-- `category`: The category ID (e.g., "basic", "food", "travel")
+- `categoryId`: The ID of the category
 
 **Response:**
 ```json
 {
   "words": [
-    "casa",
-    "gatto",
-    "cane",
-    "albero",
-    "sole"
+    {
+      "word": "ciao",
+      "translation": "hello/goodbye",
+      "example": "Ciao, come stai?",
+      "pronunciation": "tʃaʊ"
+    }
   ]
 }
 ```
 
-### 4. Get Flashcard Details
+### 5. Get Example Words
+Retrieves example words for all categories or a specific category.
+
+**Endpoint:** `GET /example-words` or `GET /example-words/:category`
+
+**Parameters:**
+- `category`: (Optional) The category ID to get examples for
+
+**Response:**
+```json
+{
+  "greetings": ["ciao", "buongiorno", "arrivederci", "salve", "buonasera"],
+  "numbers": ["uno", "due", "tre", "quattro", "cinque"],
+  "colors": ["rosso", "blu", "verde", "giallo", "nero"],
+  "food": ["pizza", "pasta", "gelato", "caffè", "vino"],
+  "animals": ["gatto", "cane", "uccello", "leone", "elefante"],
+  "family": ["madre", "padre", "sorella", "fratello", "nonna"],
+  "travel": ["aeroporto", "hotel", "biglietto", "valigia", "passaporto"],
+  "common-phrases": ["grazie", "prego", "scusa", "per favore", "mi dispiace"]
+}
+```
+
+### 6. Get Model Configuration
+Retrieves the current AI model configuration.
+
+**Endpoint:** `GET /config/model`
+
+**Response:**
+```json
+{
+  "currentModel": "nova-canvas",
+  "availableModels": ["nova-canvas", "dalle"],
+  "config": {
+    // Model-specific configuration
+  }
+}
+```
+
+### 7. Update Model Configuration
+Updates the AI model configuration.
+
+**Endpoint:** `POST /config/model`
+
+**Request Body:**
+```json
+{
+  "model": "nova-canvas"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Model updated successfully",
+  "currentModel": "nova-canvas",
+  "config": {
+    // Updated model configuration
+  }
+}
+```
+
+### 8. Get Flashcard Details
 Retrieves detailed information for a specific word.
 
 **Endpoint:** `GET /flashcard/:word`
@@ -138,7 +201,7 @@ Retrieves detailed information for a specific word.
 }
 ```
 
-### 5. Save Progress
+### 9. Save Progress
 Saves user's learning progress.
 
 **Endpoint:** `POST /progress`
@@ -162,7 +225,7 @@ Saves user's learning progress.
 }
 ```
 
-### 6. Get User Progress
+### 10. Get User Progress
 Retrieves user's learning progress.
 
 **Endpoint:** `GET /progress/:userId`
@@ -204,8 +267,8 @@ Common HTTP Status Codes:
 
 ## Rate Limiting
 
-- 100 requests per minute per IP address
 - 1000 requests per hour per user
+- Rate limiting is applied to all endpoints
 
 ## Authentication
 
@@ -219,4 +282,4 @@ Authorization: Bearer <jwt_token>
 
 The API supports CORS for the following origins:
 - `http://localhost:5173` (development)
-- `https://your-production-domain.com` (production) 
+- `http://127.0.0.1:5173` (development) 

@@ -1,42 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import '../styles/Flashcard.css';
 
-const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleFavorite }) => {
-  const [imageUrl, setImageUrl] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleFavorite, imageUrl, isLoading }) => {
   const [error, setError] = useState(null);
-  const requestInProgress = useRef(false);
-
-  useEffect(() => {
-    const loadImage = async () => {
-      if (!imageUrl && !isLoading && !requestInProgress.current) {
-        requestInProgress.current = true;
-        setIsLoading(true);
-        try {
-          console.log('Requesting image for word:', word);
-          const response = await axios.post('http://localhost:3000/api/generate-image', {
-            word
-          });
-          console.log('Received image response:', response.data);
-          
-          if (response.data.imageUrl) {
-            setImageUrl(response.data.imageUrl);
-          } else {
-            throw new Error('No image URL in response');
-          }
-        } catch (error) {
-          console.error('Error generating image:', error);
-          setError('Failed to generate image');
-        } finally {
-          setIsLoading(false);
-          requestInProgress.current = false;
-        }
-      }
-    };
-
-    loadImage();
-  }, [word]);
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation(); // Prevent card flip when clicking favorite button

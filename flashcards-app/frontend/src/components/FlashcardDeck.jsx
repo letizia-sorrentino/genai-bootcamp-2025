@@ -7,6 +7,9 @@ const FlashcardDeck = ({ flashcards, category }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
+  const [imageUrls, setImageUrls] = useState({});
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [error, setError] = useState(null);
 
   // Load favorites on component mount
   useEffect(() => {
@@ -20,6 +23,55 @@ const FlashcardDeck = ({ flashcards, category }) => {
     };
     loadFavorites();
   }, []);
+
+  // Generate image for current card
+  useEffect(() => {
+    const generateImage = async () => {
+      const currentWord = flashcards[currentIndex].word;
+      
+      // Skip if image already exists
+      if (imageUrls[currentWord]) {
+        setIsLoadingImage(false);
+        return;
+      }
+
+      setIsLoadingImage(true);
+      setError(null);
+
+      try {
+        console.log('Generating image for:', currentWord);
+        const response = await axios.post('http://localhost:3000/api/generate-image', {
+          prompt: `A clear, simple illustration of ${currentWord} for a language learning flashcard`,
+          model: 'dalle',
+          options: {
+            size: '1024x1024',
+            quality: 'standard',
+            promptType: 'flashcard',
+            promptParams: {
+              word: currentWord,
+              translation: flashcards[currentIndex].translation
+            }
+          }
+        });
+
+        if (response.data.imageUrl) {
+          setImageUrls(prev => ({
+            ...prev,
+            [currentWord]: response.data.imageUrl
+          }));
+        } else {
+          throw new Error('No image URL in response');
+        }
+      } catch (error) {
+        console.error('Error generating image:', error);
+        setError('Failed to generate image');
+      } finally {
+        setIsLoadingImage(false);
+      }
+    };
+
+    generateImage();
+  }, [currentIndex, flashcards]);
 
   const handleNext = () => {
     if (currentIndex < flashcards.length - 1) {
@@ -90,6 +142,9 @@ const FlashcardDeck = ({ flashcards, category }) => {
           onFlip={() => setIsFlipped(!isFlipped)}
           isFavorite={favorites.has(currentWord)}
           onToggleFavorite={handleToggleFavorite}
+          imageUrl={imageUrls[currentWord]}
+          isLoading={isLoadingImage}
+          error={error}
         />
 
         <button 

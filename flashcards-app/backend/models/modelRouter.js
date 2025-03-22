@@ -3,7 +3,7 @@ const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-be
 class ModelRouter {
   constructor() {
     this.models = new Map();
-    this.defaultModel = 'nova-canvas';
+    this.defaultModel = process.env.IMAGE_GENERATION_MODEL || 'nova-canvas';
   }
 
   registerModel(name, handler) {
@@ -11,39 +11,45 @@ class ModelRouter {
   }
 
   async generateImage(modelName, prompt, options = {}) {
-    // Try DALL-E first
-    const dalleModel = this.models.get('dalle');
-    if (dalleModel) {
-      try {
-        console.log('Attempting to generate image with DALL-E');
-        const imageUrl = await dalleModel.generateImage(prompt, options);
-        if (imageUrl) {
-          console.log('Successfully generated image with DALL-E');
-          return imageUrl;
+    // Use provided model or default
+    const targetModel = modelName || this.defaultModel;
+    const model = this.models.get(targetModel);
+
+    if (!model) {
+      console.error(`Model ${targetModel} not found`);
+      throw new Error(`Model ${targetModel} not available`);
+    }
+
+    try {
+      console.log(`Attempting to generate image with ${targetModel}`);
+      const imageUrl = await model.generateImage(prompt, options);
+      if (imageUrl) {
+        console.log(`Successfully generated image with ${targetModel}`);
+        return imageUrl;
+      }
+    } catch (error) {
+      console.error(`${targetModel} generation failed:`, error);
+      
+      // If the target model fails and it's not the default, try the default model
+      if (targetModel !== this.defaultModel) {
+        const defaultModel = this.models.get(this.defaultModel);
+        if (defaultModel) {
+          try {
+            console.log(`Falling back to default model ${this.defaultModel}`);
+            const fallbackImageUrl = await defaultModel.generateImage(prompt, options);
+            if (fallbackImageUrl) {
+              console.log(`Successfully generated image with ${this.defaultModel}`);
+              return fallbackImageUrl;
+            }
+          } catch (fallbackError) {
+            console.error(`${this.defaultModel} fallback failed:`, fallbackError);
+          }
         }
-      } catch (error) {
-        console.error('DALL-E generation failed:', error);
       }
     }
 
-    // Fall back to Nova Canvas
-    const novaModel = this.models.get('nova-canvas');
-    if (novaModel) {
-      try {
-        console.log('Falling back to Nova Canvas');
-        const imageUrl = await novaModel.generateImage(prompt, options);
-        if (imageUrl) {
-          console.log('Successfully generated image with Nova Canvas');
-          return imageUrl;
-        }
-      } catch (error) {
-        console.error('Nova Canvas generation failed:', error);
-      }
-    }
-
-    // If both models fail, return a placeholder
-    console.log('Both models failed, returning placeholder');
-    return `https://placehold.co/256x256/ffffff/000000/png?text=${encodeURIComponent(prompt)}`;
+    // If all attempts fail, throw an error
+    throw new Error('Failed to generate image with any available model');
   }
 }
 

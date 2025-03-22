@@ -350,10 +350,12 @@ curl -X POST http://localhost:3000/api/config/model \
 
 ### Nova Canvas
 - Supports negative prompts
-- Configurable CFG scale
+- Configurable CFG scale (default: 8)
 - Customizable image dimensions
 - Multiple image generation in one request
 - Default size: 256x256 (optimized for flashcards)
+- Returns base64-encoded images
+- Fallback to placeholder images on error
 
 ### DALL-E 3
 - Higher resolution output (1024x1024, 1792x1024, or 1024x1792)
@@ -362,6 +364,8 @@ curl -X POST http://localhost:3000/api/config/model \
 - Built-in style control ('vivid' or 'natural')
 - Quality options ('standard' or 'hd')
 - Single image generation only (n=1)
+- Returns direct URLs to generated images
+- Fallback to placeholder images on error
 
 ## Best Practices
 
@@ -370,27 +374,32 @@ curl -X POST http://localhost:3000/api/config/model \
    - Validate all inputs before making API calls
    - Handle API errors gracefully
    - Log errors for debugging
+   - Use placeholder images as fallback
 
 2. **Rate Limiting**: 
    - Implement rate limiting to manage API costs
    - Monitor API usage
    - Set appropriate limits for your use case
+   - Consider implementing request queuing
 
 3. **Caching**: 
    - Cache generated images to avoid regenerating the same images
    - Implement cache invalidation strategy
    - Consider using CDN for better performance
+   - Store both successful and failed generations
 
 4. **Prompt Engineering**: 
    - Create clear, consistent prompts for better results
    - Use model-specific prompt formats
    - Test prompts with different words and categories
+   - Include context in prompts
 
 5. **Model Selection**: 
    - Choose based on cost considerations
    - Consider quality requirements
    - Check API availability
    - Consider response time needs
+   - Evaluate image size requirements
 
 ## Cost Considerations
 
@@ -399,12 +408,14 @@ curl -X POST http://localhost:3000/api/config/model \
 - Consider implementing caching to reduce API calls
 - Use appropriate image generation parameters
 - Smaller image sizes (256x256) for better cost efficiency
+- Multiple images per request for batch processing
 
 ### DALL-E 3
 - Monitor token usage and image generation costs
 - Implement caching to avoid regenerating the same images
 - Use appropriate quality settings
 - Consider using standard quality for better cost efficiency
+- Higher resolution means higher costs
 
 ## Security Notes
 
@@ -416,6 +427,8 @@ curl -X POST http://localhost:3000/api/config/model \
 6. Validate all user inputs
 7. Implement rate limiting
 8. Use secure headers and CORS policies
+9. Sanitize prompts to prevent injection attacks
+10. Implement proper error handling to avoid information leakage
 
 ## Troubleshooting
 
@@ -426,28 +439,34 @@ Common issues and solutions:
    - Check service permissions
    - Ensure environment variables are properly set
    - Validate AWS region configuration
+   - Check token expiration
 
 2. **Generation Failures**:
    - Check prompt formatting
    - Verify model availability
    - Monitor service health
    - Check input validation errors
+   - Verify rate limits
 
 3. **Performance Issues**:
    - Implement request queuing
    - Add timeout handling
    - Use appropriate image sizes
    - Consider caching strategies
+   - Monitor response times
 
 4. **Validation Errors**:
    - Check parameter types
    - Verify required fields
    - Validate image sizes
    - Check model-specific constraints
+   - Validate prompt parameters
 
 ## Additional Resources
 
 - [Amazon Bedrock Documentation](https://docs.aws.amazon.com/bedrock)
 - [Nova Canvas Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-nova-canvas.html)
 - [OpenAI DALL-E Documentation](https://platform.openai.com/docs/guides/images)
-- [AWS SDK Documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/) 
+- [AWS SDK Documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/)
+- [Express.js Documentation](https://expressjs.com/)
+- [Node.js Documentation](https://nodejs.org/docs/) 

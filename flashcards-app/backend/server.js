@@ -314,31 +314,65 @@ app.post('/api/generate-flashcards', async (req, res) => {
   }
 });
 
-// Image generation endpoint
+// Image generation endpoint with improved error handling
 app.post('/api/generate-image', async (req, res) => {
   try {
-    const { word, category } = req.body;
-    
-    if (!word) {
-      return res.status(400).json({ error: 'Word is required' });
+    const { prompt, model, options } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Prompt is required'
+      });
     }
 
-    // Check cache first
-    const cacheKey = `${word}-${category || 'default'}`;
-    if (imageCache.has(cacheKey)) {
-      return res.json({ imageUrl: imageCache.get(cacheKey) });
+    // Validate model if provided
+    if (model && !['dalle', 'nova-canvas'].includes(model)) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Invalid model specified. Available models: dalle, nova-canvas'
+      });
     }
 
-    // Return a placeholder image with the category name
-    const placeholderUrl = `https://placehold.co/600x400/4a90e2/ffffff?text=${encodeURIComponent(category || 'Flashcard')}`;
+    const imageUrl = await modelRouter.generateImage(model, prompt, options);
     
-    // Cache the placeholder
-    imageCache.set(cacheKey, placeholderUrl);
-    
-    res.json({ imageUrl: placeholderUrl });
+    res.json({
+      success: true,
+      imageUrl,
+      model: model || process.env.IMAGE_GENERATION_MODEL || 'nova-canvas'
+    });
   } catch (error) {
     console.error('Error generating image:', error);
-    res.status(500).json({ error: 'Failed to generate image' });
+    
+    // Handle specific error cases
+    if (error.message.includes('not available')) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: error.message
+      });
+    }
+
+    // Handle API key errors
+    if (error.message.includes('API key') || error.message.includes('credentials')) {
+      return res.status(401).json({
+        error: 'Unauthorized',
+        message: 'Invalid API credentials. Please check your configuration.'
+      });
+    }
+
+    // Handle rate limiting
+    if (error.message.includes('rate limit')) {
+      return res.status(429).json({
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded. Please try again later.'
+      });
+    }
+
+    // Generic error response
+    res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'Failed to generate image. Please try again later.'
+    });
   }
 });
 
