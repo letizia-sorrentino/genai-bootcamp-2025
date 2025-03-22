@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import '../styles/Flashcard.css';
 
-const Flashcard = ({ word, translation, isFlipped, onFlip }) => {
+const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleFavorite }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,6 +38,11 @@ const Flashcard = ({ word, translation, isFlipped, onFlip }) => {
     loadImage();
   }, [word]);
 
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation(); // Prevent card flip when clicking favorite button
+    onToggleFavorite(word);
+  };
+
   return (
     <div 
       className={`flashcard ${isFlipped ? 'flipped' : ''}`}
@@ -61,6 +66,13 @@ const Flashcard = ({ word, translation, isFlipped, onFlip }) => {
               />
             )}
           </div>
+          <button 
+            className={`favorite-button ${isFavorite ? 'favorite' : ''}`}
+            onClick={handleFavoriteClick}
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            {isFavorite ? '★' : '☆'}
+          </button>
         </div>
         <div className="flashcard-back">
           <div className="translation">{translation}</div>

@@ -1,29 +1,25 @@
-import { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Flashcard from './Flashcard';
 import '../styles/FlashcardDeck.css';
 
-const FlashcardDeck = ({ flashcards }) => {
+const FlashcardDeck = ({ flashcards, category }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [favorites, setFavorites] = useState(new Set());
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      if (currentIndex < flashcards.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setIsFlipped(false);
+  // Load favorites on component mount
+  useEffect(() => {
+    const loadFavorites = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/favorites');
+        setFavorites(new Set(response.data.favorites));
+      } catch (error) {
+        console.error('Error loading favorites:', error);
       }
-    },
-    onSwipedRight: () => {
-      if (currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
-        setIsFlipped(false);
-      }
-    },
-    onTap: () => setIsFlipped(!isFlipped),
-    trackMouse: true,
-    preventDefaultTouchmoveEvent: true,
-  });
+    };
+    loadFavorites();
+  }, []);
 
   const handleNext = () => {
     if (currentIndex < flashcards.length - 1) {
@@ -39,35 +35,72 @@ const FlashcardDeck = ({ flashcards }) => {
     }
   };
 
+  const handleToggleFavorite = async (word) => {
+    try {
+      const isCurrentlyFavorite = favorites.has(word);
+      const endpoint = isCurrentlyFavorite 
+        ? `http://localhost:3000/api/favorites/${encodeURIComponent(word)}`
+        : 'http://localhost:3000/api/favorites';
+      
+      const method = isCurrentlyFavorite ? 'delete' : 'post';
+      
+      const response = await axios[method](endpoint, isCurrentlyFavorite ? {} : { word, category });
+      setFavorites(new Set(response.data.favorites));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
   if (!flashcards.length) return null;
 
+  const currentWord = flashcards[currentIndex].word;
+
   return (
-    <div className="flashcard-deck" {...handlers}>
-      <div className="deck-controls">
+    <div className="flashcard-deck">
+      <nav className="top-nav">
+        <div className="nav-content">
+          <h2 className="nav-title">{category}</h2>
+          <div className="nav-counter">
+            {currentIndex + 1} / {flashcards.length}
+          </div>
+        </div>
+      </nav>
+
+      <div className="progress-bar">
+        <div 
+          className="progress-fill"
+          style={{ width: `${(currentIndex + 1) / flashcards.length * 100}%` }}
+        />
+      </div>
+
+      <div className="deck-content">
         <button 
+          className="nav-button prev-button" 
           onClick={handlePrevious}
           disabled={currentIndex === 0}
-          className="nav-button"
+          aria-label="Previous card"
         >
-          Previous
+          ←
         </button>
-        <span className="card-counter">
-          {currentIndex + 1} / {flashcards.length}
-        </span>
+
+        <Flashcard
+          word={currentWord}
+          translation={flashcards[currentIndex].translation}
+          isFlipped={isFlipped}
+          onFlip={() => setIsFlipped(!isFlipped)}
+          isFavorite={favorites.has(currentWord)}
+          onToggleFavorite={handleToggleFavorite}
+        />
+
         <button 
+          className="nav-button next-button" 
           onClick={handleNext}
           disabled={currentIndex === flashcards.length - 1}
-          className="nav-button"
+          aria-label="Next card"
         >
-          Next
+          →
         </button>
       </div>
-      <Flashcard
-        word={flashcards[currentIndex].word}
-        translation={flashcards[currentIndex].translation}
-        isFlipped={isFlipped}
-        onFlip={() => setIsFlipped(!isFlipped)}
-      />
     </div>
   );
 };

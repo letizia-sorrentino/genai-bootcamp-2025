@@ -11,6 +11,9 @@ const NovaCanvasHandler = require('./models/novaCanvasHandler');
 const DalleHandler = require('./models/dalleHandler');
 const config = require('./models/config');
 const imageCache = require('./models/imageCache');
+const connectDB = require('./models/database');
+const Category = require('./models/Category');
+const Favorite = require('./models/Favorite');
 require('dotenv').config();
 
 // Validate required environment variables
@@ -26,6 +29,9 @@ if (missingEnvVars.length > 0) {
   console.error('Missing required environment variables:', missingEnvVars.join(', '));
   process.exit(1);
 }
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -66,18 +72,27 @@ const getBedrockRuntime = () => {
 };
 
 // Load vocabulary data with retry mechanism
-let vocabularyData = null;
 let vocabularyLoadAttempts = 0;
 const MAX_LOAD_ATTEMPTS = 3;
 
 async function loadVocabularyData() {
   try {
     const data = await fs.readFile(path.join(__dirname, 'data', 'vocabulary.json'), 'utf8');
-    vocabularyData = JSON.parse(data);
+    const vocabularyData = JSON.parse(data);
     
     // Validate vocabulary data structure
     if (!vocabularyData.categories || !Array.isArray(vocabularyData.categories)) {
       throw new Error('Invalid vocabulary data structure');
+    }
+
+    // Save categories to database
+    for (const category of vocabularyData.categories) {
+      const result = await Category.findOneAndUpdate(
+        { id: category.id },
+        category,
+        { upsert: true, new: true }
+      );
+      console.log(`Loaded category: ${category.id}`);
     }
     
     console.log('Vocabulary data loaded successfully');
@@ -90,7 +105,6 @@ async function loadVocabularyData() {
       setTimeout(loadVocabularyData, 5000); // Retry after 5 seconds
     } else {
       console.error('Failed to load vocabulary data after maximum attempts');
-      vocabularyData = { categories: [] };
     }
   }
 }
@@ -178,37 +192,79 @@ app.post('/api/config/model', async (req, res) => {
 // Routes
 
 // 1. Categories
-app.get('/api/categories', (req, res) => {
-  if (!vocabularyData) {
-    return res.status(500).json({ error: 'Vocabulary data not loaded' });
+app.get('/api/categories', async (req, res) => {
+  try {
+    // Get all categories from database
+    const categories = await Category.find({});
+    
+    // Get favorites
+    const favorites = await Favorite.find({});
+    const favoriteWords = favorites.map(f => f.word);
+
+    // Create favorites category
+    const favoritesCategory = {
+      id: 'favorites',
+      name: 'Favorites',
+      description: 'Your favorite words',
+      words: []
+    };
+
+    // Add word details to favorites category
+    for (const word of favoriteWords) {
+      for (const category of categories) {
+        const wordDetails = category.words.find(w => w.word === word);
+        if (wordDetails) {
+          favoritesCategory.words.push(wordDetails);
+          break;
+        }
+      }
+    }
+
+    // Combine favorites with other categories
+    const categoriesWithFavorites = {
+      categories: [favoritesCategory, ...categories]
+    };
+
+    res.json(categoriesWithFavorites);
+  } catch (error) {
+    console.error('Error getting categories:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get categories' 
+    });
   }
-  res.json(vocabularyData);
 });
 
-app.get('/api/categories/:categoryId', (req, res) => {
-  if (!vocabularyData) {
-    return res.status(500).json({ error: 'Vocabulary data not loaded' });
+app.get('/api/categories/:categoryId', async (req, res) => {
+  try {
+    const category = await Category.findOne({ id: req.params.categoryId });
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    res.json(category);
+  } catch (error) {
+    console.error('Error getting category:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get category' 
+    });
   }
-  
-  const category = vocabularyData.categories.find(c => c.id === req.params.categoryId);
-  if (!category) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
-  
-  res.json(category);
 });
 
-app.get('/api/words/:categoryId', (req, res) => {
-  if (!vocabularyData) {
-    return res.status(500).json({ error: 'Vocabulary data not loaded' });
+app.get('/api/words/:categoryId', async (req, res) => {
+  try {
+    const category = await Category.findOne({ id: req.params.categoryId });
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+    res.json({ words: category.words });
+  } catch (error) {
+    console.error('Error getting words:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get words' 
+    });
   }
-  
-  const category = vocabularyData.categories.find(c => c.id === req.params.categoryId);
-  if (!category) {
-    return res.status(404).json({ error: 'Category not found' });
-  }
-  
-  res.json({ words: category.words });
 });
 
 // 2. Example Words
@@ -228,86 +284,61 @@ app.get('/api/example-words', (req, res) => {
 
 // 3. Generate Flashcards (Modified to only return words and translations)
 app.post('/api/generate-flashcards', async (req, res) => {
-  console.log('Received request to generate flashcards');
-  console.log('Request body:', req.body);
-  
-  const { category } = req.body;
-
-  if (!category) {
-    console.log('Invalid request: category is required');
-    return res.status(400).json({ error: 'Bad Request', message: 'Category is required' });
-  }
-
   try {
-    console.log('Processing category:', category);
+    const { category } = req.body;
+    
+    if (!category) {
+      return res.status(400).json({ error: 'Category is required' });
+    }
 
-    // Get category data
-    const categoryData = vocabularyData.categories.find(c => c.id === category);
+    // Get words for the category
+    const categoryData = await Category.findOne({ id: category });
     if (!categoryData) {
-      console.log('Category not found:', category);
       return res.status(404).json({ error: 'Category not found' });
     }
 
-    // Return only words and translations
-    const flashcards = categoryData.words.map(wordDetails => ({
-      word: wordDetails.word,
-      translation: wordDetails.translation,
-      example: wordDetails.example,
-      pronunciation: wordDetails.pronunciation
+    const words = categoryData.words;
+    
+    // Generate flashcards with placeholder images
+    const flashcards = words.map(word => ({
+      word: word.word,
+      translation: word.translation,
+      category: categoryData.name,
+      imageUrl: `https://placehold.co/600x400/4a90e2/ffffff?text=${encodeURIComponent(categoryData.name)}`
     }));
 
-    console.log('Generated flashcards:', flashcards);
     res.json({ flashcards });
   } catch (error) {
     console.error('Error generating flashcards:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to generate flashcards' });
+    res.status(500).json({ error: 'Failed to generate flashcards' });
   }
 });
 
-// New endpoint for generating a single image
+// Image generation endpoint
 app.post('/api/generate-image', async (req, res) => {
-  console.log('Received request to generate image');
-  console.log('Request body:', req.body);
-  
-  const { word } = req.body;
-
-  if (!word) {
-    console.log('Invalid request: word is required');
-    return res.status(400).json({ error: 'Bad Request', message: 'Word is required' });
-  }
-
   try {
-    // Check cache first
-    const cachedImage = imageCache.get(word);
-    if (cachedImage) {
-      console.log('Returning cached image for word:', word);
-      return res.json({ imageUrl: cachedImage });
+    const { word, category } = req.body;
+    
+    if (!word) {
+      return res.status(400).json({ error: 'Word is required' });
     }
 
-    console.log('Generating image for word:', word);
+    // Check cache first
+    const cacheKey = `${word}-${category || 'default'}`;
+    if (imageCache.has(cacheKey)) {
+      return res.json({ imageUrl: imageCache.get(cacheKey) });
+    }
+
+    // Return a placeholder image with the category name
+    const placeholderUrl = `https://placehold.co/600x400/4a90e2/ffffff?text=${encodeURIComponent(category || 'Flashcard')}`;
     
-    // Get current model and its configuration
-    const currentModel = config.getModel();
-    const modelConfig = config.getModelConfig(currentModel);
-    console.log('Starting image generation (will try DALL-E first, then Nova Canvas)');
-
-    // Generate image using the model router
-    const imageUrl = await modelRouter.generateImage(currentModel, word, {
-      promptType: 'flashcard',
-      promptParams: {
-        word
-      },
-      ...modelConfig
-    });
-
-    // Cache the generated image
-    imageCache.set(word, imageUrl);
-    console.log('Image generated and cached for word:', word);
-
-    res.json({ imageUrl });
+    // Cache the placeholder
+    imageCache.set(cacheKey, placeholderUrl);
+    
+    res.json({ imageUrl: placeholderUrl });
   } catch (error) {
     console.error('Error generating image:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to generate image' });
+    res.status(500).json({ error: 'Failed to generate image' });
   }
 });
 
@@ -365,6 +396,80 @@ app.get('/api/progress/:userId', userLimiter, async (req, res) => {
   } catch (error) {
     console.error('Error getting user progress:', error);
     res.status(500).json({ error: 'Internal Server Error', message: 'Failed to get user progress' });
+  }
+});
+
+// Favorites endpoints
+app.post('/api/favorites', userLimiter, async (req, res) => {
+  const { word, category } = req.body;
+
+  if (!word || !category) {
+    return res.status(400).json({ error: 'Bad Request', message: 'Word and category are required' });
+  }
+
+  try {
+    // Check if word exists in the category
+    const categoryData = await Category.findOne({ id: category });
+    if (!categoryData || !categoryData.words.some(w => w.word === word)) {
+      return res.status(404).json({ error: 'Word not found in category' });
+    }
+
+    // Add to favorites
+    await Favorite.findOneAndUpdate(
+      { word },
+      { word, category },
+      { upsert: true, new: true }
+    );
+
+    // Get updated favorites list
+    const favorites = await Favorite.find({});
+    
+    res.json({
+      success: true,
+      message: 'Word added to favorites',
+      favorites: favorites.map(f => f.word)
+    });
+  } catch (error) {
+    console.error('Error adding to favorites:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to add to favorites' });
+  }
+});
+
+app.delete('/api/favorites/:word', userLimiter, async (req, res) => {
+  const { word } = req.params;
+
+  if (!word) {
+    return res.status(400).json({ error: 'Bad Request', message: 'Word is required' });
+  }
+
+  try {
+    // Remove from favorites
+    await Favorite.findOneAndDelete({ word });
+
+    // Get updated favorites list
+    const favorites = await Favorite.find({});
+    
+    res.json({
+      success: true,
+      message: 'Word removed from favorites',
+      favorites: favorites.map(f => f.word)
+    });
+  } catch (error) {
+    console.error('Error removing from favorites:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to remove from favorites' });
+  }
+});
+
+app.get('/api/favorites', userLimiter, async (req, res) => {
+  try {
+    const favorites = await Favorite.find({});
+    res.json({
+      favorites: favorites.map(f => f.word),
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    console.error('Error getting favorites:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to get favorites' });
   }
 });
 
