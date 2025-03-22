@@ -6,34 +6,40 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs').promises;
+const modelRouter = require('./models/modelRouter');
+const NovaCanvasHandler = require('./models/novaCanvasHandler');
+const DalleHandler = require('./models/dalleHandler');
+const config = require('./models/config');
 require('dotenv').config();
+
+// Validate required environment variables
+const requiredEnvVars = [
+  'AWS_ACCESS_KEY_ID',
+  'AWS_SECRET_ACCESS_KEY',
+  'AWS_REGION',
+  'OPENAI_API_KEY'
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error('Missing required environment variables:', missingEnvVars.join(', '));
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Security middleware
+app.use(express.json({ limit: '10mb' })); // Limit request size
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// CORS configuration
 app.use(cors({
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
-app.use(express.json());
-
-// Configure AWS
-// const configureAWS = () => {
-//   AWS.config.update({
-//     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-//     region: process.env.AWS_REGION || 'us-east-1'
-//   });
-// };
-
-// Create Bedrock Runtime client
-// const getBedrockRuntime = () => {
-//   configureAWS();
-//   return new AWS.BedrockRuntime();
-// };
 
 // Rate limiting middleware
 const userLimiter = rateLimit({
@@ -42,21 +48,135 @@ const userLimiter = rateLimit({
   message: { error: 'Too many requests', message: 'Please try again later' }
 });
 
-// Load vocabulary data
+// Configure AWS
+const configureAWS = () => {
+  try {
+    AWS.config.update({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION
+    });
+  } catch (error) {
+    console.error('Error configuring AWS:', error);
+    throw new Error('Failed to configure AWS');
+  }
+};
+
+// Create Bedrock Runtime client
+const getBedrockRuntime = () => {
+  configureAWS();
+  return new AWS.BedrockRuntime();
+};
+
+// Load vocabulary data with retry mechanism
 let vocabularyData = null;
+let vocabularyLoadAttempts = 0;
+const MAX_LOAD_ATTEMPTS = 3;
 
 async function loadVocabularyData() {
   try {
     const data = await fs.readFile(path.join(__dirname, 'data', 'vocabulary.json'), 'utf8');
     vocabularyData = JSON.parse(data);
+    
+    // Validate vocabulary data structure
+    if (!vocabularyData.categories || !Array.isArray(vocabularyData.categories)) {
+      throw new Error('Invalid vocabulary data structure');
+    }
+    
+    console.log('Vocabulary data loaded successfully');
   } catch (error) {
     console.error('Error loading vocabulary data:', error);
-    vocabularyData = { categories: [] };
+    vocabularyLoadAttempts++;
+    
+    if (vocabularyLoadAttempts < MAX_LOAD_ATTEMPTS) {
+      console.log(`Retrying vocabulary data load (attempt ${vocabularyLoadAttempts}/${MAX_LOAD_ATTEMPTS})...`);
+      setTimeout(loadVocabularyData, 5000); // Retry after 5 seconds
+    } else {
+      console.error('Failed to load vocabulary data after maximum attempts');
+      vocabularyData = { categories: [] };
+    }
   }
 }
 
 // Load data on startup
 loadVocabularyData();
+
+// Initialize model handlers with error handling
+let novaCanvasHandler;
+let dalleHandler;
+
+try {
+  novaCanvasHandler = new NovaCanvasHandler(process.env.AWS_REGION);
+  dalleHandler = new DalleHandler(process.env.OPENAI_API_KEY);
+  
+  modelRouter.registerModel('nova-canvas', novaCanvasHandler);
+  modelRouter.registerModel('dalle', dalleHandler);
+  
+  console.log('Model handlers initialized successfully');
+} catch (error) {
+  console.error('Error initializing model handlers:', error);
+  process.exit(1);
+}
+
+// Input validation middleware
+const validateCategory = (req, res, next) => {
+  const { category } = req.params;
+  if (!category || typeof category !== 'string') {
+    return res.status(400).json({ 
+      error: 'Bad Request', 
+      message: 'Invalid category parameter' 
+    });
+  }
+  next();
+};
+
+// Routes with improved error handling
+app.get('/api/config/model', (req, res) => {
+  try {
+    const currentModel = config.getModel();
+    const modelConfig = config.getModelConfig(currentModel);
+    res.json({
+      currentModel,
+      availableModels: config.getAvailableModels(),
+      config: modelConfig
+    });
+  } catch (error) {
+    console.error('Error getting model configuration:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get model configuration' 
+    });
+  }
+});
+
+// Add a route to change the model
+app.post('/api/config/model', async (req, res) => {
+  try {
+    const { model } = req.body;
+    
+    if (!model) {
+      return res.status(400).json({ 
+        error: 'Bad Request', 
+        message: 'Model name is required' 
+      });
+    }
+
+    const newModel = config.setModel(model);
+    const modelConfig = config.getModelConfig(newModel);
+
+    res.json({
+      message: 'Model updated successfully',
+      currentModel: newModel,
+      config: modelConfig
+    });
+  } catch (error) {
+    console.error('Error changing model:', error);
+    res.status(400).json({ 
+      error: 'Bad Request', 
+      message: error.message 
+    });
+  }
+});
 
 // Routes
 
@@ -124,9 +244,7 @@ app.post('/api/generate-flashcards', async (req, res) => {
   try {
     console.log('Processing category:', category);
     const flashcards = [];
-    /* Uncomment when AWS credentials are configured
     const bedrockRuntime = getBedrockRuntime();
-    */
 
     // Get category data
     const categoryData = vocabularyData.categories.find(c => c.id === category);
@@ -135,38 +253,24 @@ app.post('/api/generate-flashcards', async (req, res) => {
       return res.status(404).json({ error: 'Category not found' });
     }
 
+    // Get current model and its configuration
+    const currentModel = config.getModel();
+    const modelConfig = config.getModelConfig(currentModel);
+    console.log('Using model:', currentModel);
+
     // Generate flashcards for all words in the category
     for (const wordDetails of categoryData.words) {
-      console.log('Processing word:', wordDetails.word);
-      console.log('Found word details:', wordDetails);
-
-      /* Uncomment when AWS credentials are configured
-      // Generate image using Stable Diffusion XL
-      const params = {
-        modelId: 'stability.stable-diffusion-xl-v1',
-        contentType: 'application/json',
-        accept: 'application/json',
-        body: JSON.stringify({
-          text_prompts: [
-            {
-              text: `A simple, clear image representing the Italian word "${wordDetails.word}" in the category "${category}"`
-            }
-          ],
-          cfg_scale: 7,
-          height: 512,
-          width: 512,
-          steps: 30,
-          seed: Math.floor(Math.random() * 1000000)
-        })
-      };
-
-      const response = await bedrockRuntime.invokeModel(params).promise();
-      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-      const imageUrl = `data:image/png;base64,${responseBody.artifacts[0].base64}`;
-      */
-
-      // Use placeholder image for testing
-      const imageUrl = `https://placehold.co/512x512/ffffff/000000/png?text=${encodeURIComponent(wordDetails.word)}`;
+      console.log('Generating flashcard for word:', wordDetails.word);
+      
+      // Generate image using the model router with prompt parameters
+      const imageUrl = await modelRouter.generateImage(currentModel, wordDetails.word, {
+        promptType: 'flashcard',
+        promptParams: {
+          word: wordDetails.word,
+          category: categoryData.name
+        },
+        ...modelConfig
+      });
 
       flashcards.push({
         word: wordDetails.word,
@@ -256,13 +360,45 @@ async function getWordDetails(word) {
   };
 }
 
-// Error handling middleware
+// Improved error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  console.error('Unhandled error:', err.stack);
+  
+  // Handle specific error types
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({ 
+      error: 'Bad Request', 
+      message: err.message 
+    });
+  }
+  
+  if (err.name === 'UnauthorizedError') {
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Authentication required' 
+    });
+  }
+  
+  // Default error response
+  res.status(500).json({ 
+    error: 'Internal Server Error', 
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong!' 
+  });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server with error handling
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+}).on('error', (error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 }); 
