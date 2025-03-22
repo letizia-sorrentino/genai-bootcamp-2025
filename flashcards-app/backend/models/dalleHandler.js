@@ -13,7 +13,7 @@ class DalleHandler {
 
   async generateImage(prompt, options = {}) {
     const {
-      size = "1024x1024",  // DALL-E 3 supports 1024x1024, 1792x1024, or 1024x1792
+      size = "1024x1024",  // DALL-E 3 default size
       quality = "standard", // 'standard' or 'hd'
       n = 1,              // DALL-E 3 only supports n=1
       promptType = 'flashcard',
@@ -22,19 +22,22 @@ class DalleHandler {
 
     // Validate size
     const validSizes = ["1024x1024", "1792x1024", "1024x1792"];
-    if (!validSizes.includes(size)) {
-      throw new Error(`Invalid size: ${size}. Valid sizes are: ${validSizes.join(', ')}`);
+    if (!validSizes.includes(size) && size !== "1024x1024") {
+      console.log(`Invalid size ${size}, using default size 1024x1024`);
+      options.size = "1024x1024";
     }
 
     // Validate quality
     const validQualities = ["standard", "hd"];
     if (!validQualities.includes(quality)) {
-      throw new Error(`Invalid quality: ${quality}. Valid qualities are: ${validQualities.join(', ')}`);
+      console.log(`Invalid quality ${quality}, using default quality standard`);
+      options.quality = "standard";
     }
 
     // Validate n
     if (n !== 1) {
-      throw new Error('DALL-E 3 only supports generating one image at a time (n=1)');
+      console.log('DALL-E 3 only supports n=1, using default value');
+      options.n = 1;
     }
 
     try {
@@ -44,9 +47,9 @@ class DalleHandler {
       const response = await this.client.images.generate({
         model: this.model,
         prompt: fullPrompt,
-        n: n,
-        size: size,
-        quality: quality
+        n: options.n,
+        size: options.size,
+        quality: options.quality
       });
 
       if (!response.data?.[0]?.url) {
@@ -56,8 +59,7 @@ class DalleHandler {
       return response.data[0].url;
     } catch (error) {
       console.error('Error generating image with DALL-E:', error);
-      // Return a placeholder image with the word as text
-      return `https://placehold.co/${size}/ffffff/000000/png?text=${encodeURIComponent(prompt)}`;
+      throw error; // Let the model router handle the fallback
     }
   }
 }

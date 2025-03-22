@@ -10,6 +10,7 @@ const modelRouter = require('./models/modelRouter');
 const NovaCanvasHandler = require('./models/novaCanvasHandler');
 const DalleHandler = require('./models/dalleHandler');
 const config = require('./models/config');
+const imageCache = require('./models/imageCache');
 require('dotenv').config();
 
 // Validate required environment variables
@@ -225,7 +226,7 @@ app.get('/api/example-words', (req, res) => {
   res.json(examples);
 });
 
-// 3. Generate Flashcards
+// 3. Generate Flashcards (Modified to only return words and translations)
 app.post('/api/generate-flashcards', async (req, res) => {
   console.log('Received request to generate flashcards');
   console.log('Request body:', req.body);
@@ -239,8 +240,6 @@ app.post('/api/generate-flashcards', async (req, res) => {
 
   try {
     console.log('Processing category:', category);
-    const flashcards = [];
-    const bedrockRuntime = getBedrockRuntime();
 
     // Get category data
     const categoryData = vocabularyData.categories.find(c => c.id === category);
@@ -249,39 +248,66 @@ app.post('/api/generate-flashcards', async (req, res) => {
       return res.status(404).json({ error: 'Category not found' });
     }
 
-    // Get current model and its configuration
-    const currentModel = config.getModel();
-    const modelConfig = config.getModelConfig(currentModel);
-    console.log('Using model:', currentModel);
-
-    // Generate flashcards for all words in the category
-    for (const wordDetails of categoryData.words) {
-      console.log('Generating flashcard for word:', wordDetails.word);
-      
-      // Generate image using the model router with prompt parameters
-      const imageUrl = await modelRouter.generateImage(currentModel, wordDetails.word, {
-        promptType: 'flashcard',
-        promptParams: {
-          word: wordDetails.word,
-          category: categoryData.name
-        },
-        ...modelConfig
-      });
-
-      flashcards.push({
-        word: wordDetails.word,
-        translation: wordDetails.translation,
-        imageUrl,
-        example: wordDetails.example,
-        pronunciation: wordDetails.pronunciation
-      });
-    }
+    // Return only words and translations
+    const flashcards = categoryData.words.map(wordDetails => ({
+      word: wordDetails.word,
+      translation: wordDetails.translation,
+      example: wordDetails.example,
+      pronunciation: wordDetails.pronunciation
+    }));
 
     console.log('Generated flashcards:', flashcards);
     res.json({ flashcards });
   } catch (error) {
     console.error('Error generating flashcards:', error);
     res.status(500).json({ error: 'Internal Server Error', message: 'Failed to generate flashcards' });
+  }
+});
+
+// New endpoint for generating a single image
+app.post('/api/generate-image', async (req, res) => {
+  console.log('Received request to generate image');
+  console.log('Request body:', req.body);
+  
+  const { word } = req.body;
+
+  if (!word) {
+    console.log('Invalid request: word is required');
+    return res.status(400).json({ error: 'Bad Request', message: 'Word is required' });
+  }
+
+  try {
+    // Check cache first
+    const cachedImage = imageCache.get(word);
+    if (cachedImage) {
+      console.log('Returning cached image for word:', word);
+      return res.json({ imageUrl: cachedImage });
+    }
+
+    console.log('Generating image for word:', word);
+    
+    // Get current model and its configuration
+    const currentModel = config.getModel();
+    const modelConfig = config.getModelConfig(currentModel);
+    console.log('Starting image generation (will try DALL-E first, then Nova Canvas)');
+
+    // Generate image using the model router
+    const imageUrl = await modelRouter.generateImage(currentModel, word, {
+      promptType: 'flashcard',
+      promptParams: {
+        word
+      },
+      ...modelConfig
+    });
+
+    // Cache the generated image
+    imageCache.set(word, imageUrl);
+    console.log('Image generated and cached for word:', word);
+
+    res.json({ imageUrl });
+  } catch (error) {
+    console.error('Error generating image:', error);
+    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to generate image' });
   }
 });
 

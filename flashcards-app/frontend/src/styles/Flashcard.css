@@ -55,13 +55,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .card-image {
   max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 5px;
+  display: block;
+}
+
+.card-image.placeholder {
+  opacity: 0.5;
 }
 
 .loading-spinner {
@@ -72,6 +82,48 @@
   border-top: 4px solid #2a7d8b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.error-message {
+  position: absolute;
+  color: #dc3545;
+  font-size: 1rem;
+  text-align: center;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.placeholder-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 1rem;
+  border-radius: 5px;
+  width: 90%;
+  text-align: center;
+  z-index: 1;
+}
+
+.placeholder-message p {
+  margin: 0;
+  color: #666;
+}
+
+.placeholder-message p:first-child {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2a7d8b;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-details {
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 @keyframes spin {
@@ -92,5 +144,23 @@
   
   .image-container {
     height: 150px;
+  }
+  
+  .error-message {
+    font-size: 0.9rem;
+    width: 90%;
+  }
+
+  .placeholder-message {
+    width: 95%;
+    padding: 0.75rem;
+  }
+
+  .placeholder-message p:first-child {
+    font-size: 1rem;
+  }
+
+  .placeholder-details {
+    font-size: 0.8rem;
   }
 } 

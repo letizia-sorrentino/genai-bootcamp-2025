@@ -21,6 +21,13 @@ function App() {
       })
       
       console.log('Response from server:', response.data);
+      console.log('Flashcards data:', response.data.flashcards);
+      
+      // Log each flashcard's image URL
+      response.data.flashcards.forEach((card, index) => {
+        console.log(`Flashcard ${index + 1} image URL:`, card.imageUrl);
+      });
+      
       setFlashcards(response.data.flashcards)
     } catch (error) {
       console.error('Error generating flashcards:', error)

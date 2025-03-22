@@ -10,7 +10,7 @@ class NovaCanvasHandler {
 
   async generateImage(prompt, options = {}) {
     const {
-      size = "256x256",  // Smaller default size for flashcards
+      size = "1024x1024",  // Default size for high quality images
       quality = "standard",
       n = 1,
       promptType = 'flashcard',
@@ -18,9 +18,8 @@ class NovaCanvasHandler {
     } = options;
 
     try {
-      // Generate prompt using the prompt manager with model-specific configuration
+      // Generate prompt using the prompt manager
       const generatedPrompt = promptManager.generatePrompt(promptType, this.modelName, promptParams);
-      const promptConfig = promptManager.getPromptConfig(promptType, this.modelName);
 
       const input = {
         modelId: this.modelId,
@@ -28,9 +27,7 @@ class NovaCanvasHandler {
         accept: "application/json",
         body: JSON.stringify({
           textToImageParams: {
-            text: generatedPrompt,
-            style: promptConfig.style,
-            negativePrompt: promptConfig.negativePrompt
+            text: generatedPrompt
           },
           taskType: "TEXT_IMAGE",
           imageGenerationConfig: {
@@ -50,7 +47,7 @@ class NovaCanvasHandler {
       return `data:image/png;base64,${responseBody.artifacts[0].base64}`;
     } catch (error) {
       console.error('Error generating image with Nova Canvas:', error);
-      return `https://placehold.co/${size}/ffffff/000000/png?text=${encodeURIComponent(prompt)}`;
+      throw error; // Let the model router handle the fallback
     }
   }
 }

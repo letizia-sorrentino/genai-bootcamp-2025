@@ -65,7 +65,6 @@ const FlashcardDeck = ({ flashcards }) => {
       <Flashcard
         word={flashcards[currentIndex].word}
         translation={flashcards[currentIndex].translation}
-        imageUrl={flashcards[currentIndex].imageUrl}
         isFlipped={isFlipped}
         onFlip={() => setIsFlipped(!isFlipped)}
       />
