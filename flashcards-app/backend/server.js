@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const AWS = require('aws-sdk');
+const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
@@ -48,24 +48,20 @@ const userLimiter = rateLimit({
   message: { error: 'Too many requests', message: 'Please try again later' }
 });
 
-// Configure AWS
-const configureAWS = () => {
-  try {
-    AWS.config.update({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION
-    });
-  } catch (error) {
-    console.error('Error configuring AWS:', error);
-    throw new Error('Failed to configure AWS');
-  }
-};
-
 // Create Bedrock Runtime client
 const getBedrockRuntime = () => {
-  configureAWS();
-  return new AWS.BedrockRuntime();
+  try {
+    return new BedrockRuntimeClient({
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+      }
+    });
+  } catch (error) {
+    console.error('Error creating Bedrock Runtime client:', error);
+    throw new Error('Failed to create Bedrock Runtime client');
+  }
 };
 
 // Load vocabulary data with retry mechanism
