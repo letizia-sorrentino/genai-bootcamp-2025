@@ -1,0 +1,90 @@
+.favorite-deck {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  position: relative;
+}
+
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #2a7d8b;
+  color: white;
+  padding: 1rem;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-title {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  color: rgba(255, 255, 255, 0.8);
+  transform: translateX(-5px);
+}
+
+.deck-container {
+  flex: 1;
+  padding-top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
+}
+
+/* Prevent pull-to-refresh */
+html, body {
+  overscroll-behavior-y: none;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Add safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .top-nav {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .deck-container {
+    padding-top: calc(4rem + env(safe-area-inset-top));
+    height: calc(100vh - 4rem - env(safe-area-inset-top));
+  }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .nav-title {
+    font-size: 1.2rem;
+  }
+  
+  .back-button {
+    font-size: 1rem;
+  }
+} 

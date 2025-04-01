@@ -19,6 +19,7 @@ const FlashcardDeck = ({ flashcards, category }) => {
         setFavorites(new Set(response.data.favorites));
       } catch (error) {
         console.error('Error loading favorites:', error);
+        setError('Failed to load favorites');
       }
     };
     loadFavorites();
@@ -96,66 +97,64 @@ const FlashcardDeck = ({ flashcards, category }) => {
       
       const method = isCurrentlyFavorite ? 'delete' : 'post';
       
-      const response = await axios[method](endpoint, isCurrentlyFavorite ? {} : { word, category });
-      setFavorites(new Set(response.data.favorites));
+      if (method === 'post') {
+        await axios.post(endpoint, { word, category: category || 'favorites' });
+      } else {
+        await axios.delete(endpoint);
+      }
+
+      // Update local favorites state
+      setFavorites(prev => {
+        const newFavorites = new Set(prev);
+        if (isCurrentlyFavorite) {
+          newFavorites.delete(word);
+        } else {
+          newFavorites.add(word);
+        }
+        return newFavorites;
+      });
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      setError('Failed to update favorites');
     }
   };
 
-  if (!flashcards.length) return null;
-
-  const currentWord = flashcards[currentIndex].word;
+  const currentCard = flashcards[currentIndex];
+  if (!currentCard) return null;
 
   return (
     <div className="flashcard-deck">
-      <nav className="top-nav">
-        <div className="nav-content">
-          <h2 className="nav-title">{category}</h2>
-          <div className="nav-counter">
-            {currentIndex + 1} / {flashcards.length}
-          </div>
-        </div>
-      </nav>
-
-      <div className="progress-bar">
-        <div 
-          className="progress-fill"
-          style={{ width: `${(currentIndex + 1) / flashcards.length * 100}%` }}
-        />
-      </div>
-
       <div className="deck-content">
         <button 
-          className="nav-button prev-button" 
           onClick={handlePrevious}
           disabled={currentIndex === 0}
+          className="nav-button prev-button"
           aria-label="Previous card"
         >
           ←
         </button>
 
         <Flashcard
-          word={currentWord}
-          translation={flashcards[currentIndex].translation}
+          word={currentCard.word}
           isFlipped={isFlipped}
           onFlip={() => setIsFlipped(!isFlipped)}
-          isFavorite={favorites.has(currentWord)}
+          isFavorite={favorites.has(currentCard.word)}
           onToggleFavorite={handleToggleFavorite}
-          imageUrl={imageUrls[currentWord]}
+          imageUrl={imageUrls[currentCard.word]}
           isLoading={isLoadingImage}
-          error={error}
         />
 
         <button 
-          className="nav-button next-button" 
           onClick={handleNext}
           disabled={currentIndex === flashcards.length - 1}
+          className="nav-button next-button"
           aria-label="Next card"
         >
           →
         </button>
       </div>
+      
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

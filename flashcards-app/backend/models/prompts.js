@@ -3,14 +3,11 @@ class PromptManager {
     this.prompts = {
       'flashcard': {
         'nova-canvas': {
-          template: 'Create a clear, educational illustration for a language learning flashcard. The image should represent the Italian word "{word}" (translation: "{translation}"). The style should be minimalist and suitable for educational purposes.',
-          style: 'minimalist, clean, educational, professional illustration',
+          template: 'Create a clear, educational illustration. The image should represent the Italian word "{word}". The style should be minimalist and suitable for educational purposes.',          style: 'minimalist, clean, educational, professional illustration',
           negativePrompt: 'complex, cluttered, inappropriate, text, watermark, blurry, low quality, photorealistic, photograph'
         },
         'dalle': {
-          template: 'Create a clear, educational illustration for a language learning app. The image should represent the Italian word "{word}" (translation: "{translation}"). The image should be minimalist, clean, and educational, with a professional illustration style that is clear and easy to understand. Avoid complex or cluttered scenes, inappropriate content, text or watermarks, blurry or low quality images, photorealistic or photographic styles. The image should be suitable for a flashcard and help learners remember the word.',
-          style: 'minimalist, clean, educational, professional illustration',
-          negativePrompt: 'complex, cluttered, inappropriate, text, watermark, blurry, low quality, photorealistic, photograph'
+          template: 'A clean, minimalistic vector illustration representing the meaning of the Italian word “{word}”. Do not include any text or letters in the image. The illustration should clearly depict the concept. Transparent background, flat style, bright colours, simple shapes.',
         }
       }
     };

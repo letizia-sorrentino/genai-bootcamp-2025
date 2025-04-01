@@ -44,7 +44,15 @@ class NovaCanvasHandler {
       const command = new InvokeModelCommand(input);
       const response = await this.client.send(command);
       const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-      return `data:image/png;base64,${responseBody.artifacts[0].base64}`;
+      
+      // Check if the response has the expected structure
+      if (!responseBody || !responseBody.images || !responseBody.images[0]) {
+        console.error('Unexpected response format:', responseBody);
+        throw new Error('Invalid response format from Nova Canvas API');
+      }
+
+      // Nova Canvas returns the image directly in base64 format
+      return `data:image/png;base64,${responseBody.images[0]}`;
     } catch (error) {
       console.error('Error generating image with Nova Canvas:', error);
       throw error; // Let the model router handle the fallback

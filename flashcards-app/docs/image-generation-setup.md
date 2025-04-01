@@ -221,7 +221,7 @@ class PromptManager {
           negativePrompt: 'complex, cluttered, inappropriate, text, watermark, blurry, low quality, photorealistic, photograph'
         },
         'dalle': {
-          template: 'Create a clear, educational illustration for a language learning flashcard. The image should represent the Italian word "{word}" in the context of "{category}". The image should be minimalist, clean, and educational, with a professional illustration style that is clear and easy to understand. Avoid complex or cluttered scenes, inappropriate content, text or watermarks, blurry or low quality images, photorealistic or photographic styles.'
+          template: 'A clean, minimalistic vector illustration representing the Italian word “{word}”. The illustration should clearly depict the meaning of the word, suitable for use in a children’s language learning flashcard app. No text, white background, flat style, bright colours, simple shapes.'
         }
       }
     };

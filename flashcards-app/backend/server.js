@@ -11,7 +11,7 @@ const NovaCanvasHandler = require('./models/novaCanvasHandler');
 const DalleHandler = require('./models/dalleHandler');
 const config = require('./models/config');
 const imageCache = require('./models/imageCache');
-const connectDB = require('./models/database');
+const { connectDB } = require('./models/database');
 const Category = require('./models/Category');
 const Favorite = require('./models/Favorite');
 require('dotenv').config();
@@ -433,77 +433,90 @@ app.get('/api/progress/:userId', userLimiter, async (req, res) => {
   }
 });
 
-// Favorites endpoints
-app.post('/api/favorites', userLimiter, async (req, res) => {
-  const { word, category } = req.body;
-
-  if (!word || !category) {
-    return res.status(400).json({ error: 'Bad Request', message: 'Word and category are required' });
-  }
-
+// 2. Favorites
+app.get('/api/favorites', async (req, res) => {
   try {
-    // Check if word exists in the category
-    const categoryData = await Category.findOne({ id: category });
-    if (!categoryData || !categoryData.words.some(w => w.word === word)) {
-      return res.status(404).json({ error: 'Word not found in category' });
+    const favorites = await Favorite.find({});
+    res.json({ favorites: favorites.map(f => f.word) });
+  } catch (error) {
+    console.error('Error getting favorites:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to get favorites' 
+    });
+  }
+});
+
+app.post('/api/favorites', async (req, res) => {
+  try {
+    const { word, category } = req.body;
+    
+    if (!word || !category) {
+      return res.status(400).json({ 
+        error: 'Bad Request', 
+        message: 'Word and category are required' 
+      });
     }
 
-    // Add to favorites
-    await Favorite.findOneAndUpdate(
+    // Check if word exists in the specified category
+    const categoryData = await Category.findOne({ id: category });
+    if (!categoryData) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'Category not found' 
+      });
+    }
+
+    const wordExists = categoryData.words.some(w => w.word === word);
+    if (!wordExists) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'Word not found in category' 
+      });
+    }
+
+    // Create or update favorite
+    const favorite = await Favorite.findOneAndUpdate(
       { word },
       { word, category },
       { upsert: true, new: true }
     );
 
-    // Get updated favorites list
-    const favorites = await Favorite.find({});
-    
-    res.json({
-      success: true,
-      message: 'Word added to favorites',
-      favorites: favorites.map(f => f.word)
+    res.json({ 
+      message: 'Favorite added successfully',
+      favorite 
     });
   } catch (error) {
-    console.error('Error adding to favorites:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to add to favorites' });
+    console.error('Error adding favorite:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to add favorite' 
+    });
   }
 });
 
-app.delete('/api/favorites/:word', userLimiter, async (req, res) => {
-  const { word } = req.params;
-
-  if (!word) {
-    return res.status(400).json({ error: 'Bad Request', message: 'Word is required' });
-  }
-
+app.delete('/api/favorites/:word', async (req, res) => {
   try {
-    // Remove from favorites
-    await Favorite.findOneAndDelete({ word });
-
-    // Get updated favorites list
-    const favorites = await Favorite.find({});
+    const { word } = req.params;
     
-    res.json({
-      success: true,
-      message: 'Word removed from favorites',
-      favorites: favorites.map(f => f.word)
-    });
-  } catch (error) {
-    console.error('Error removing from favorites:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to remove from favorites' });
-  }
-});
+    const favorite = await Favorite.findOneAndDelete({ word });
+    if (!favorite) {
+      return res.status(404).json({ 
+        error: 'Not Found', 
+        message: 'Favorite not found' 
+      });
+    }
 
-app.get('/api/favorites', userLimiter, async (req, res) => {
-  try {
-    const favorites = await Favorite.find({});
-    res.json({
-      favorites: favorites.map(f => f.word),
-      timestamp: Date.now()
+    res.json({ 
+      message: 'Favorite removed successfully',
+      favorite 
     });
   } catch (error) {
-    console.error('Error getting favorites:', error);
-    res.status(500).json({ error: 'Internal Server Error', message: 'Failed to get favorites' });
+    console.error('Error removing favorite:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error', 
+      message: 'Failed to remove favorite' 
+    });
   }
 });
 

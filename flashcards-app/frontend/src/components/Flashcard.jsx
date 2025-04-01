@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import '../styles/Flashcard.css';
 
-const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleFavorite, imageUrl, isLoading }) => {
+const Flashcard = ({ word, isFlipped, onFlip, isFavorite, onToggleFavorite, imageUrl, isLoading }) => {
   const [error, setError] = useState(null);
 
   const handleFavoriteClick = (e) => {
@@ -16,7 +16,6 @@ const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleF
     >
       <div className="flashcard-inner">
         <div className="flashcard-front">
-          <div className="word">{word}</div>
           <div className="image-container">
             {isLoading && <div className="loading-spinner" />}
             {error && <div className="error-message">{error}</div>}
@@ -41,7 +40,7 @@ const Flashcard = ({ word, translation, isFlipped, onFlip, isFavorite, onToggleF
           </button>
         </div>
         <div className="flashcard-back">
-          <div className="translation">{translation}</div>
+          <div className="word">{word}</div>
         </div>
       </div>
     </div>
