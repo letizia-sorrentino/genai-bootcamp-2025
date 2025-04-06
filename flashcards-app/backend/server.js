@@ -48,6 +48,20 @@ app.use(cors({
   credentials: true
 }));
 
+// Add CSP headers
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' https://api.openai.com https://bedrock-runtime.us-east-1.amazonaws.com;"
+  );
+  next();
+});
+
 // Rate limiting middleware
 const userLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
