@@ -172,6 +172,19 @@ The application will be available at `http://localhost:5173`
 - Frontend development server: 5173
 - Backend API server: 3000
 
+### API Documentation
+The API documentation is available through Swagger UI at:
+```
+http://localhost:3000/api-docs
+```
+
+This interactive documentation provides:
+- Complete list of all available endpoints
+- Request/response schemas
+- Try-it-out functionality for testing endpoints
+- Detailed parameter descriptions
+- Authentication requirements
+
 ## License
 
 This project is licensed under the ISC License - see the LICENSE file for details. 

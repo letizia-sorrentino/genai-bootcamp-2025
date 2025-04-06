@@ -7,7 +7,8 @@ class PromptManager {
           negativePrompt: 'complex, cluttered, inappropriate, text, watermark, blurry, low quality, photorealistic, photograph'
         },
         'dalle': {
-          template: 'Create a clean and minimalistic vector illustration that clearly shows the meaning of “{word}”. The image should be easy for beginner language learners to understand, using simple and direct visual cues. Avoid any text, letters, or numbers. Use a white background, flat design style, bright colours, and basic, recognisable shapes to support intuitive learning.',
+          template: 'Illustrate the concept of the Italian word “{word}” using a clean and minimalistic vector image. The image must not contain any text, characters, or writing — not even subtle or decorative ones. Use only visual storytelling appropriate for beginners learning Italian. Apply a flat, colourful style with a white background and easy-to-recognise shapes.',
+          negativePrompt: 'text, letters, words, numbers, writing, handwriting, symbols, subtitles, captions',
         }
       }
     };

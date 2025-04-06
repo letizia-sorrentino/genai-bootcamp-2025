@@ -6,6 +6,8 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs').promises;
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const modelRouter = require('./models/modelRouter');
 const NovaCanvasHandler = require('./models/novaCanvasHandler');
 const DalleHandler = require('./models/dalleHandler');
@@ -15,6 +17,27 @@ const { connectDB } = require('./models/database');
 const Category = require('./models/Category');
 const Favorite = require('./models/Favorite');
 require('dotenv').config();
+
+// Swagger configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Flashcards API',
+      version: '1.0.0',
+      description: 'API documentation for the Flashcards application',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+        description: 'Development server',
+      },
+    ],
+  },
+  apis: ['./server.js'], // Path to the API docs
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -61,6 +84,9 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rate limiting middleware
 const userLimiter = rateLimit({
@@ -206,6 +232,18 @@ app.post('/api/config/model', async (req, res) => {
 // Routes
 
 // 1. Categories
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get all categories
+ *     description: Retrieve all available categories for flashcards
+ *     responses:
+ *       200:
+ *         description: List of categories
+ *       500:
+ *         description: Server error
+ */
 app.get('/api/categories', async (req, res) => {
   try {
     // Get all categories from database
@@ -249,6 +287,25 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/categories/{categoryId}:
+ *   get:
+ *     summary: Get a specific category
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Category details
+ *       404:
+ *         description: Category not found
+ *       500:
+ *         description: Server error
+ */
 app.get('/api/categories/:categoryId', async (req, res) => {
   try {
     const category = await Category.findOne({ id: req.params.categoryId });
@@ -265,6 +322,25 @@ app.get('/api/categories/:categoryId', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/words/{categoryId}:
+ *   get:
+ *     summary: Get words for a category
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of words in the category
+ *       404:
+ *         description: Category not found
+ *       500:
+ *         description: Server error
+ */
 app.get('/api/words/:categoryId', async (req, res) => {
   try {
     const category = await Category.findOne({ id: req.params.categoryId });
@@ -282,6 +358,18 @@ app.get('/api/words/:categoryId', async (req, res) => {
 });
 
 // 2. Example Words
+/**
+ * @swagger
+ * /api/example-words:
+ *   get:
+ *     summary: Get example words
+ *     description: Retrieve example words for different categories
+ *     responses:
+ *       200:
+ *         description: List of example words
+ *       500:
+ *         description: Server error
+ */
 app.get('/api/example-words', (req, res) => {
   const examples = {
     greetings: ['ciao', 'buongiorno', 'arrivederci', 'salve', 'buonasera'],
@@ -297,6 +385,28 @@ app.get('/api/example-words', (req, res) => {
 });
 
 // 3. Generate Flashcards (Modified to only return words and translations)
+/**
+ * @swagger
+ * /api/generate-flashcards:
+ *   post:
+ *     summary: Generate flashcards
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               category:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Generated flashcards
+ *       400:
+ *         description: Invalid request
+ *       500:
+ *         description: Server error
+ */
 app.post('/api/generate-flashcards', async (req, res) => {
   try {
     const { category } = req.body;
@@ -329,6 +439,32 @@ app.post('/api/generate-flashcards', async (req, res) => {
 });
 
 // Image generation endpoint with improved error handling
+/**
+ * @swagger
+ * /api/generate-image:
+ *   post:
+ *     summary: Generate image for flashcards
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               prompt:
+ *                 type: string
+ *               model:
+ *                 type: string
+ *               options:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Generated image URL
+ *       400:
+ *         description: Invalid request
+ *       500:
+ *         description: Server error
+ */
 app.post('/api/generate-image', async (req, res) => {
   try {
     const { prompt, model, options } = req.body;
@@ -448,6 +584,37 @@ app.get('/api/progress/:userId', userLimiter, async (req, res) => {
 });
 
 // 2. Favorites
+/**
+ * @swagger
+ * /api/favorites:
+ *   get:
+ *     summary: Get favorite words
+ *     responses:
+ *       200:
+ *         description: List of favorite words
+ *       500:
+ *         description: Server error
+ *   post:
+ *     summary: Add a word to favorites
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               word:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Favorite added successfully
+ *       400:
+ *         description: Invalid request
+ *       500:
+ *         description: Server error
+ */
 app.get('/api/favorites', async (req, res) => {
   try {
     const favorites = await Favorite.find({});
