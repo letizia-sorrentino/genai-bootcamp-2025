@@ -1,80 +1,6 @@
 {
   "categories": [
     {
-      "id": "greetings",
-      "name": "Greetings",
-      "description": "Common Italian greetings and expressions",
-      "words": [
-        {
-          "word": "ciao",
-          "translation": "hello/goodbye",
-          "example": "Ciao, come stai?",
-          "pronunciation": "ˈtʃao"
-        },
-        {
-          "word": "buongiorno",
-          "translation": "good morning",
-          "example": "Buongiorno, signore!",
-          "pronunciation": "bwɔnˈdʒorno"
-        },
-        {
-          "word": "arrivederci",
-          "translation": "goodbye",
-          "example": "Arrivederci, a presto!",
-          "pronunciation": "arːiveˈdertʃi"
-        },
-        {
-          "word": "salve",
-          "translation": "hello (formal)",
-          "example": "Salve, signora!",
-          "pronunciation": "ˈsalve"
-        },
-        {
-          "word": "buonasera",
-          "translation": "good evening",
-          "example": "Buonasera, come sta?",
-          "pronunciation": "bwɔnaˈsera"
-        }
-      ]
-    },
-    {
-      "id": "numbers",
-      "name": "Numbers",
-      "description": "Basic Italian numbers",
-      "words": [
-        {
-          "word": "uno",
-          "translation": "one",
-          "example": "Ho un gatto",
-          "pronunciation": "ˈuno"
-        },
-        {
-          "word": "due",
-          "translation": "two",
-          "example": "Ho due cani",
-          "pronunciation": "ˈdue"
-        },
-        {
-          "word": "tre",
-          "translation": "three",
-          "example": "Sono le tre",
-          "pronunciation": "tre"
-        },
-        {
-          "word": "quattro",
-          "translation": "four",
-          "example": "Ho quattro fratelli",
-          "pronunciation": "ˈkwattro"
-        },
-        {
-          "word": "cinque",
-          "translation": "five",
-          "example": "Sono le cinque",
-          "pronunciation": "ˈtʃinkwe"
-        }
-      ]
-    },
-    {
       "id": "colors",
       "name": "Colors",
       "description": "Common Italian colors",
@@ -186,43 +112,6 @@
       ]
     },
     {
-      "id": "family",
-      "name": "Family",
-      "description": "Family-related vocabulary",
-      "words": [
-        {
-          "word": "madre",
-          "translation": "mother",
-          "example": "Mia madre cucina bene",
-          "pronunciation": "ˈmadre"
-        },
-        {
-          "word": "padre",
-          "translation": "father",
-          "example": "Mio padre lavora",
-          "pronunciation": "ˈpadre"
-        },
-        {
-          "word": "sorella",
-          "translation": "sister",
-          "example": "Mia sorella studia",
-          "pronunciation": "soˈrella"
-        },
-        {
-          "word": "fratello",
-          "translation": "brother",
-          "example": "Mio fratello gioca",
-          "pronunciation": "fraˈtello"
-        },
-        {
-          "word": "nonna",
-          "translation": "grandmother",
-          "example": "Mia nonna cucina",
-          "pronunciation": "ˈnonna"
-        }
-      ]
-    },
-    {
       "id": "travel",
       "name": "Travel",
       "description": "Travel-related vocabulary",
@@ -256,31 +145,6 @@
           "translation": "passport",
           "example": "Ho dimenticato il passaporto",
           "pronunciation": "passaˈporto"
-        }
-      ]
-    },
-    {
-      "id": "common-phrases",
-      "name": "Common Phrases",
-      "description": "Common Italian phrases",
-      "words": [
-        {
-          "word": "grazie",
-          "translation": "thank you",
-          "example": "Grazie mille!",
-          "pronunciation": "ˈɡrattsje"
-        },
-        {
-          "word": "prego",
-          "translation": "you're welcome",
-          "example": "Prego, di niente!",
-          "pronunciation": "ˈpreɡo"
-        },
-        {
-          "word": "scusa",
-          "translation": "sorry/excuse me",
-          "example": "Scusa, non ho capito",
-          "pronunciation": "ˈskuza"
         }
       ]
     }

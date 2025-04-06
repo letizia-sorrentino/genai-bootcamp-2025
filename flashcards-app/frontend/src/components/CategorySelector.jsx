@@ -2,14 +2,10 @@ import '../styles/CategorySelector.css';
 
 const CategorySelector = ({ selectedModel, onModelChange }) => {
   const categories = [
-    { id: 'greetings', name: 'Greetings' },
-    { id: 'numbers', name: 'Numbers' },
     { id: 'colors', name: 'Colors' },
     { id: 'food', name: 'Food & Drinks' },
     { id: 'animals', name: 'Animals' },
-    { id: 'family', name: 'Family' },
-    { id: 'travel', name: 'Travel' },
-    { id: 'common-phrases', name: 'Common Phrases' }
+    { id: 'travel', name: 'Travel' }
   ];
 
   return (

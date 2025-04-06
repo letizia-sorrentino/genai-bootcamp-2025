@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
 import './App.css'
 import FlashcardDeck from './components/FlashcardDeck'
-import ModelSelector from './components/ModelSelector'
+import CategorySelector from './components/CategorySelector'
 import LoadingScreen from './components/LoadingScreen'
 import FavoritesView from './components/FavoritesView'
 import NavBar from './components/NavBar'
@@ -11,7 +11,7 @@ import axios from 'axios'
 function AppContent() {
   const [flashcards, setFlashcards] = useState([])
   const [loading, setLoading] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState('greetings')
+  const [selectedCategory, setSelectedCategory] = useState('colors')
   const navigate = useNavigate()
   
   // Function to generate flashcards
@@ -78,9 +78,9 @@ function AppContent() {
               
               <div className="setup-container">
                 <h1>Italian Flashcards</h1>
-                <ModelSelector 
-                  selectedModel={selectedCategory} 
-                  onModelChange={setSelectedCategory} 
+                <CategorySelector
+                  selectedModel={selectedCategory}
+                  onModelChange={setSelectedCategory}
                 />
                 <button 
                   className="generate-button"

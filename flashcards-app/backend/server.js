@@ -1,22 +1,30 @@
-const express = require('express');
-const cors = require('cors');
-const { BedrockRuntimeClient, InvokeModelCommand } = require('@aws-sdk/client-bedrock-runtime');
-const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcryptjs');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
-const fs = require('fs').promises;
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const modelRouter = require('./models/modelRouter');
-const NovaCanvasHandler = require('./models/novaCanvasHandler');
-const DalleHandler = require('./models/dalleHandler');
-const config = require('./models/config');
-const imageCache = require('./models/imageCache');
-const { connectDB } = require('./models/database');
-const Category = require('./models/Category');
-const Favorite = require('./models/Favorite');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { promises as fs } from 'fs';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import modelRouter from './models/modelRouter.js';
+import NovaCanvasHandler from './models/novaCanvasHandler.js';
+import DalleHandler from './models/dalleHandler.js';
+import config from './models/config.js';
+import imageCache from './models/imageCache.js';
+import { connectDB } from './models/database.js';
+import Category from './models/Category.js';
+import Favorite from './models/Favorite.js';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+
+// Configure dotenv
+dotenv.config();
+
+// ES modules __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Swagger configuration
 const swaggerOptions = {
