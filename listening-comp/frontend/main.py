@@ -349,7 +349,7 @@ def render_interactive_stage():
         # Fetch questions from backend
         try:
             # Only fetch from practice-questions endpoint which includes fallback questions
-            response = requests.get("http://localhost:8000/api/practice-questions")
+            response = requests.get("http://backend:8000/api/practice-questions")
             
             all_questions = []
             if response.status_code == 200:
@@ -372,7 +372,7 @@ def render_interactive_stage():
                             with st.spinner("Generating audio..."):
                                 # Get audio file
                                 audio_response = requests.get(
-                                    f"http://localhost:8000/api/question-audio/{current_question['id']}",
+                                    f"http://backend:8000/api/question-audio/{current_question['id']}",
                                     stream=True
                                 )
                                 

@@ -1,0 +1,29 @@
+services:
+  backend:
+    build:
+      context: .
+      target: backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+    depends_on:
+      - backend 

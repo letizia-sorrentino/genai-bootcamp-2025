@@ -3,30 +3,59 @@
 This repository contains a listening comprehension application built with Streamlit and AWS Bedrock for AI-powered responses.
 
 ## Prerequisites
-- Python 3.9+
-- AWS account
-- Required Python packages (see `requirements.txt`)
+- Docker and Docker Compose
+- AWS account with Bedrock access
+- AWS credentials (Access Key ID and Secret Access Key)
 
-## Installation
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd <repository-directory>
-   ```
+## Key Features
 
-2. Set up a virtual environment (recommended):
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
+### 🤖 Chat with Nova
+Interact with Nova, our AI-powered Italian language assistant. Ask questions about Italian grammar, vocabulary, or cultural aspects and get instant responses.
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+![Chat Interface](screenshots/Screenshot%202025-04-11%20at%2021.33.00.png)
 
-## AWS Bedrock Setup
+Features:
+- Real-time conversation with AI
+- Example questions provided
+- Clear chat history
+- Easy-to-use interface
 
+### 📚 Practice Questions
+Practice your Italian with interactive questions that include audio playback for listening comprehension.
+
+![Question Interface](screenshots/Screenshot%202025-04-11%20at%2021.52.39.png)
+![Sample Answer 1](screenshots/Screenshot%202025-04-11%20at%2021.53.24.png)
+![Sample Answer 2](screenshots/Screenshot%202025-04-11%20at%2021.46.19.png)
+
+Features:
+- Multiple choice questions
+- Audio playback for listening practice
+- Immediate feedback on answers
+- Detailed explanations
+- Progress tracking
+
+### 🎧 Audio Generation
+Listen to AI-generated Italian audio for perfect pronunciation practice.
+
+![Audio Controls](screenshots/Screenshot%202025-04-11%20at%2021.52.54.png)
+
+## Installation and Setup
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd <repository-directory>
+```
+
+### 2. Configure AWS Credentials
+Create a `.env` file in the root directory with your AWS credentials:
+```bash
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_DEFAULT_REGION=us-east-1
+```
+
+### 3. AWS Bedrock Setup
 1. Create an AWS account if you don't have one
 2. Create an IAM user with programmatic access:
    - Sign in to AWS Management Console
@@ -41,30 +70,20 @@ This repository contains a listening comprehension application built with Stream
    - Request access to the required models (e.g., amazon.nova-micro-v1:0)
    - Accept the terms of service
 
-4. Configure AWS credentials:
+### 4. Run the Application
+1. Build and start the containers:
    ```bash
-   aws configure
+   docker-compose up --build
    ```
-   - Enter your Access Key ID and Secret Access Key
-   - Set the default region to "us-east-1" (or the region you're using)
-   - Set the output format (optional, press Enter for default)
 
-## Running the Application
+2. Access the application:
+   - Frontend: http://localhost:8501
+   - Backend API: http://localhost:8000
 
-### Running the Backend
-
-```bash
-cd backend
-python main.py
-```
-
-### Running the Frontend (Streamlit App)
-
-```bash
-streamlit run chat.py
-```
-
-This will start the Streamlit app and open it in your default web browser. If it doesn't open automatically, you can access it at http://localhost:8501.
+3. To stop the containers:
+   ```bash
+   docker-compose down
+   ```
 
 ## Troubleshooting
 
@@ -80,14 +99,15 @@ Ensure that:
 2. Your IAM user has the necessary permissions
 3. The model ID in your code matches an available model in your account
 
-### Streamlit Run Issues
+### Docker Issues
 
-If you see this warning:
-```
-Warning: to view this Streamlit app on a browser, run it with the following command: streamlit run chat.py [ARGUMENTS]
-```
-
-You're trying to run a Streamlit app with Python directly. Always use `streamlit run <filename>` instead of `python <filename>`.
+If you encounter AWS credential issues in Docker:
+1. Verify your `.env` file contains the correct AWS credentials
+2. Check that the environment variables are properly set in the containers:
+   ```bash
+   docker-compose exec backend env | grep AWS
+   ```
+3. Ensure the AWS credentials have the necessary permissions
 
 ## Project Structure
 
@@ -95,11 +115,12 @@ You're trying to run a Streamlit app with Python directly. Always use `streamlit
   - `main.py` - Backend entry point
   - `bedrock_chat.py` - AWS Bedrock integration
 
-- `chat.py` - Streamlit frontend application
+- `frontend/` - Streamlit frontend application
+  - `main.py` - Frontend entry point
 
 ## Configuration
 
-You can modify the following settings in `bedrock_chat.py`:
+You can modify the following settings in `backend/bedrock_chat.py`:
 
 - `MODEL_ID` - The AWS Bedrock model ID to use
 - `region_name` - AWS region (default: "us-east-1")
@@ -109,3 +130,4 @@ You can modify the following settings in `bedrock_chat.py`:
 For more information about:
 - [AWS Bedrock documentation](https://docs.aws.amazon.com/bedrock/)
 - [Streamlit documentation](https://docs.streamlit.io/)
+- [Docker documentation](https://docs.docker.com/)

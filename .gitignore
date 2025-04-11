@@ -64,3 +64,6 @@ build/
 # Output files
 output/cache/*
 !output/cache/.gitkeep
+
+# Project specific
+useful-docs/
