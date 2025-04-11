@@ -97,3 +97,22 @@ The app uses an S-Rank grading system:
 - For production use, consider deploying on Streamlit Cloud
 - You may need to adjust file paths for Tesseract OCR installation based on your system
 - For larger deployments, consider using Streamlit's authentication options
+
+## Application Screenshots
+
+Here are some screenshots showing the application in action:
+
+### Initial Setup and Sentence Generation
+![Initial Setup](screenshots/00_testing.png)
+
+### Writing Practice and Review Process - test 1
+![Writing Practice](screenshots/01_testing.png)
+![Upload and Review](screenshots/03_testing.png)
+
+### Writing Practice and Review Process - test 2
+![Testing](screenshots/04_testing.png)
+![Testing Results](screenshots/05_testing.png)
+
+### Uploaded writings
+![Example 1](screenshots/IMG_1887.jpg)
+![Example 2](screenshots/IMG_1889.jpg)
