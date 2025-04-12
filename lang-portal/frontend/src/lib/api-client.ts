@@ -10,18 +10,16 @@ export class ApiError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
+    const error = await response.json().catch(() => ({}));
     throw new ApiError(
       response.status,
       error.message || 'An error occurred'
-    )
+    );
   }
   
-  // First get the raw text to log and debug
   const responseText = await response.text();
   console.log('Raw API response:', responseText);
   
-  // Try to parse as JSON
   let jsonResponse;
   try {
     jsonResponse = JSON.parse(responseText);
@@ -30,50 +28,33 @@ async function handleResponse<T>(response: Response): Promise<T> {
     console.error('Failed to parse API response as JSON:', e);
     throw new ApiError(500, 'Invalid JSON response from server');
   }
-  
-  // Handle the backend response format which might be:
-  // { success: true, message: "Success", items: [...] }
-  // or { success: true, message: "Success", data: {...} }
-  
-  // If the response has a success property and items or data, extract it
+
+  // Handle the success response format
   if (jsonResponse && jsonResponse.success === true) {
-    console.log('Received successful response with success flag');
-    
-    // Return items array if it exists
-    if (Array.isArray(jsonResponse.items)) {
-      console.log('Returning items array from response');
+    if (jsonResponse.items) {
+      // For list responses, preserve original IDs and ensure stats are initialized
+      const itemsWithStats = jsonResponse.items.map((item: any) => ({
+        ...item,
+        correct_count: item.correct_count || 0,
+        wrong_count: item.wrong_count || 0
+      }));
+      
       return {
-        data: jsonResponse.items,
-        pagination: jsonResponse.pagination || {
-          current_page: 1,
-          total_pages: 1,
-          total_items: jsonResponse.items.length
-        }
+        data: itemsWithStats,
+        pagination: jsonResponse.pagination
       } as unknown as T;
-    }
-    
-    // Return data object if it exists
-    if (jsonResponse.data) {
-      console.log('Returning data object from response');
-      return jsonResponse.data as T;
+    } else if (jsonResponse.data) {
+      // For single item responses, ensure stats are initialized
+      const data = {
+        ...jsonResponse.data,
+        correct_count: jsonResponse.data.correct_count || 0,
+        wrong_count: jsonResponse.data.wrong_count || 0
+      };
+      return data as T;
     }
   }
-  
-  // If response is an array, wrap it
-  if (Array.isArray(jsonResponse)) {
-    console.log('Returning array response');
-    return {
-      data: jsonResponse,
-      pagination: {
-        current_page: 1,
-        total_pages: 1,
-        total_items: jsonResponse.length
-      }
-    } as unknown as T;
-  }
-  
-  // If no special handling needed, return the response as is
-  console.log('Returning response as is');
+
+  // Return the response as is if no special handling needed
   return jsonResponse as T;
 }
 
@@ -171,34 +152,39 @@ export const api = {
     fetchApi<Word>(`/words/${id}`),
 
   // Study Activities
-  getStudyActivities: () => 
-    fetchApi<any>('/study_activities').then((response: any) => {
-      // If response is already an array, return it
-      if (Array.isArray(response)) {
-        return response as StudyActivity[];
+  getStudyActivities: () => {
+    // Define our static list of study activities
+    const activities: StudyActivity[] = [
+      {
+        id: "word-quiz",
+        title: 'Word Quiz',
+        description: 'Test your vocabulary by translating words from English to Italian',
+        thumbnail: '🎯',
+        launchUrl: '/word_quiz'
       }
-      
-      // If response has data property that is an array, return it
-      if (response && Array.isArray(response.data)) {
-        return response.data as StudyActivity[];
-      }
-      
-      // Map the backend response format to the frontend expected format
-      if (response && response.items && Array.isArray(response.items)) {
-        return response.items.map((item: any) => ({
-          id: item.id,
-          title: item.name || '',
-          thumbnail: item.thumbnail || '',
-          description: item.description || '',
-          launchUrl: item.url || ''
-        }));
-      }
-      
-      console.error('Unexpected response format for study activities:', response);
-      return [] as StudyActivity[];
-    }),
-  getStudyActivity: (id: number) => 
-    fetchApi<StudyActivity>(`/study_activities/${id}`),
+    ];
+
+    // Return the activities directly without making an API call
+    return Promise.resolve(activities);
+  },
+  getStudyActivity: (id: number | string) => {
+    // Return the Word Quiz activity if ID matches
+    if (id === "word-quiz" || id === 1) {
+      return Promise.resolve({
+        id: "word-quiz",
+        title: 'Word Quiz',
+        description: 'Test your vocabulary by translating words from English to Italian',
+        thumbnail: '🎯',
+        launchUrl: '/word_quiz',
+        stats: {
+          totalAttempts: 0,
+          correctAnswers: 0,
+          averageScore: 0
+        }
+      } as StudyActivity);
+    }
+    return Promise.reject(new ApiError(404, 'Activity not found'));
+  },
   launchStudyActivity: (id: number, groupId: number) => 
     fetchApi<{ launchUrl: string }>(`/study_activities/${id}/launch`, {
       method: 'POST',
@@ -206,10 +192,18 @@ export const api = {
     }),
 
   // Study Sessions
-  getStudySessions: (params: PaginationParams = {}) => 
-    fetchApi<PaginatedResponse<StudySession>>('/study_sessions', {
-      queryParams: params
-    }),
+  getStudySessions: (params: PaginationParams = {}) => {
+    // For now, return empty sessions list
+    return Promise.resolve({
+      data: [],
+      pagination: {
+        current_page: 1,
+        total_pages: 0,
+        total_items: 0,
+        items_per_page: 50
+      }
+    });
+  },
   getStudySession: (id: number) => 
     fetchApi<StudySession>(`/study_sessions/${id}`),
 
@@ -246,5 +240,18 @@ export const api = {
   getGroupSessions: (groupId: number, params: PaginationParams = {}) => 
     fetchApi<PaginatedResponse<StudySession>>(`/groups/${groupId}/study_sessions`, {
       queryParams: params
+    }),
+
+  // Word Statistics
+  updateWordStats: (wordId: number, isCorrect: boolean) =>
+    fetchApi<void>(`/words/${wordId}/stats`, {
+      method: 'POST',
+      body: { is_correct: isCorrect }
+    }).then(response => {
+      console.log('Stats update response:', response);
+      return response;
+    }).catch(error => {
+      console.error('Error updating stats:', error);
+      throw error;
     }),
 } 

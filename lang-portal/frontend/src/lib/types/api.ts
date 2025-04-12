@@ -3,9 +3,12 @@ export type SortDirection = 'asc' | 'desc'
 
 export interface PaginatedResponse<T> {
   data: T[]
-  total: number
-  page: number
-  totalPages: number
+  pagination: {
+    current_page: number
+    total_pages: number
+    total_items: number
+    items_per_page: number
+  }
 }
 
 // Dashboard Types
@@ -52,30 +55,34 @@ export interface Word {
   id: number
   italian: string
   english: string
-  audioUrl: string
-  correctCount: number
-  wrongCount: number
+  correct_count: number
+  wrong_count: number
+  audio_url?: string
 }
 
 // Study Activity Types
 export interface StudyActivity {
-  id: number
+  id: number | string
   title: string
-  thumbnail: string
   description: string
+  thumbnail: string
   launchUrl: string
+  stats?: {
+    totalAttempts: number
+    correctAnswers: number
+    averageScore: number
+  }
 }
 
 // Study Session Types
 export interface StudySession {
   id: number
-  activityName: string
-  groupName: string
-  startTime: string
-  endTime: string
-  reviewItemCount: number
-  correctCount: number
-  incorrectCount: number
+  activity_name: string
+  group_id: number
+  group_name: string
+  start_time: string
+  end_time?: string
+  review_items_count: number
 }
 
 // Word Group Types
@@ -83,7 +90,7 @@ export interface WordGroup {
   id: number
   name: string
   description: string
-  wordCount: number
-  lastStudied: string | null
   createdAt: string
+  lastStudied?: string
+  wordCount: number
 } 

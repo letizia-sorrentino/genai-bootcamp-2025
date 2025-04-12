@@ -105,6 +105,7 @@ export const groupsController = {
       // Get words with stats
       const words = await db.all(`
         SELECT 
+          w.id,
           w.italian, 
           w.english,
           COALESCE(SUM(CASE WHEN wri.correct = 1 THEN 1 ELSE 0 END), 0) as correct_count,

@@ -27,7 +27,7 @@ export default function StudyActivities() {
             key={activity.id}
             title={activity.title}
             thumbnail={activity.thumbnail}
-            onView={() => navigate(`/study_activities/${activity.id}`)}
+            onView={() => navigate(`/study_activities/word-quiz`)}
             onLaunch={() => navigate(activity.launchUrl)}
           />
         ))}

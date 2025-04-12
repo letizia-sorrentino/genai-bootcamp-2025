@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useApi } from "@/lib/hooks/use-api"
 import { api } from "@/lib/api-client"
 import { Word } from "@/lib/types/api"
@@ -7,11 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AudioPlayer } from "@/components/ui/audio-player"
 import { Progress } from "@/components/ui/progress"
 import { DetailsSkeleton } from "@/components/skeletons/details-skeleton"
-import { toast } from "sonner"
+import { useAppSelector } from "@/store/hooks"
+import { Button } from "@/components/ui/button"
 
 export default function WordShow() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { data: word, loading, error, request } = useApi<Word>()
+  
+  // Get word stats from Redux store
+  const wordStats = useAppSelector(state => state.wordStats.stats)
+  const currentWordStats = id ? wordStats[parseInt(id)] : null
 
   useEffect(() => {
     if (id) {
@@ -21,22 +27,32 @@ export default function WordShow() {
 
   if (loading) return <DetailsSkeleton />
 
-  if (error) {
-    toast.error("Failed to update word")
-    return <div>Error: {error}</div>
+  if (error || !word) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[200px] space-y-4">
+        <p className="text-xl">Word not found</p>
+        <Button onClick={() => navigate('/study_activities/word-quiz')}>
+          Back to Quiz
+        </Button>
+      </div>
+    )
   }
-  if (!word) return null
 
-  const totalAttempts = word.correctCount + word.wrongCount
+  // Use stats from Redux store if available, otherwise use zeros
+  const stats = currentWordStats || { correct_count: 0, wrong_count: 0 }
+  const totalAttempts = stats.correct_count + stats.wrong_count
   const successRate = totalAttempts > 0 
-    ? Math.round((word.correctCount / totalAttempts) * 100)
+    ? Math.round((stats.correct_count / totalAttempts) * 100)
     : 0
-
-  toast.success("Word updated successfully")
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">{word.italian}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">{word.italian}</h1>
+        <Button onClick={() => navigate('/study_activities/word-quiz')}>
+          Back to Quiz
+        </Button>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -48,16 +64,18 @@ export default function WordShow() {
               <div className="text-sm text-muted-foreground">English</div>
               <p className="text-xl">{word.english}</p>
             </div>
-            <div>
-              <div className="text-sm text-muted-foreground mb-2">Audio</div>
-              <AudioPlayer src={word.audioUrl} />
-            </div>
+            {word.audio_url && (
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Audio</div>
+                <AudioPlayer src={word.audio_url} />
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Study Progress</CardTitle>
+            <CardTitle>Quiz Progress</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -69,13 +87,13 @@ export default function WordShow() {
               <div>
                 <div className="text-sm text-muted-foreground">Correct</div>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-500">
-                  {word.correctCount}
+                  {stats.correct_count}
                 </p>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Wrong</div>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-500">
-                  {word.wrongCount}
+                  {stats.wrong_count}
                 </p>
               </div>
             </div>

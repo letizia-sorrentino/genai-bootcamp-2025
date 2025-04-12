@@ -1,11 +1,17 @@
 import { api } from "@/lib/api-client"
 import { ResetDialog } from "@/components/settings/reset-dialog"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useAppDispatch } from "@/store/hooks"
+import { resetSessionStats } from "@/store/sessionStatsSlice"
 
 export default function Settings() {
+  const dispatch = useAppDispatch();
+
   // Create a wrapper function for resetHistory that returns Promise<void>
   const handleResetHistory = async (): Promise<void> => {
     await api.resetHistory();
+    // Clear Redux state after API reset
+    dispatch(resetSessionStats());
   };
 
   return (

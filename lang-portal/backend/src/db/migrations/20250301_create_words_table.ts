@@ -8,6 +8,10 @@ export async function up(db: Database): Promise<void> {
       english TEXT NOT NULL,
       parts TEXT
     );
+
+    -- Create indexes for commonly queried columns
+    CREATE INDEX IF NOT EXISTS idx_words_italian ON words(italian);
+    CREATE INDEX IF NOT EXISTS idx_words_english ON words(english);
   `)
 }
 

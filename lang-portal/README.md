@@ -2,6 +2,13 @@
 
 A comprehensive web application for learning Italian vocabulary and tracking study progress.
 
+![Dashboard](docs/assets/Screenshot%202025-04-12%20at%2015.24.02.png)
+![Study Activities](docs/assets/Screenshot%202025-04-12%20at%2015.24.17.png)
+![Words](docs/assets/Screenshot%202025-04-12%20at%2015.24.45.png)
+![Groups](docs/assets/Screenshot%202025-04-12%20at%2015.25.00.png)
+![Study Sessions](docs/assets/Screenshot%202025-04-12%20at%2015.25.10.png)
+![Settings](docs/assets/Screenshot%202025-04-12%20at%2015.25.21.png)
+
 ## Project Structure
 
 This project is organized as a monorepo with the following components:
@@ -17,6 +24,8 @@ This project is organized as a monorepo with the following components:
 - Multiple study activities (Vocabulary Quiz, Word Matching, Typing Practice)
 - Study session tracking and progress statistics
 - User preferences and settings
+- Dark/Light theme support
+- Responsive navigation with collapsible sidebar
 
 ## Tech Stack
 
@@ -32,6 +41,7 @@ This project is organized as a monorepo with the following components:
 - Vite.js
 - TypeScript
 - ShadCN components
+- Redux Toolkit for state management
 
 ## Getting Started
 
@@ -120,6 +130,31 @@ npm run dev
 
 The frontend will automatically connect to the backend using the API URL specified in the environment variables.
 
+## Frontend Architecture
+
+The frontend application is built with a modern architecture:
+
+### State Management
+- Redux Toolkit for global state
+- Slices for different features:
+  - `sessionStats`: Study session statistics
+  - `words`: Vocabulary management
+  - `groups`: Word group organization
+  - `studyActivities`: Study activity tracking
+  - `settings`: User preferences
+
+### Theme System
+- Dark/Light theme support
+- System preference detection
+- Smooth theme transitions
+- Persistent theme selection
+
+### Components
+- Reusable UI components with ShadCN
+- Custom hooks for API integration
+- Responsive layout components
+- Error boundary implementation
+
 ## Documentation
 
 The project includes comprehensive documentation in the `docs/` folder:
@@ -164,6 +199,18 @@ For more details on backend development, see the [backend README](backend/README
 ### Frontend Development
 
 For more details on frontend development, see the [frontend README](frontend/README.md).
+
+## Further Development
+
+### AI Integration
+- Add AI-powered study activities
+
+### Essential Improvements
+- Integrate with backend Learning Record Store (LRS)
+- Add offline support and data persistence
+- Implement proper error handling
+- Add comprehensive testing
+- Improve accessibility
 
 ## License
 

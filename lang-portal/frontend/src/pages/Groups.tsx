@@ -4,15 +4,20 @@ import { api } from "@/lib/api-client"
 import { WordGroup, PaginatedResponse, SortDirection } from "@/lib/types/api"
 import { SortableTable } from "@/components/ui/table"
 import { Pagination } from "@/components/ui/pagination"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { Column } from "@/lib/types/table"
+import { Button } from "@/components/ui/button"
+import { useAppSelector } from "@/store/hooks"
 import { format } from "date-fns"
 
 export default function Groups() {
   const [page, setPage] = useState(1)
   const [sortColumn, setSortColumn] = useState<keyof WordGroup>('name')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const navigate = useNavigate()
   
   const { data: groups, loading, error, request } = useApi<PaginatedResponse<WordGroup>>()
+  const sessionStats = useAppSelector(state => state.sessionStats)
 
   useEffect(() => {
     request(() => api.getWordGroups({
@@ -20,28 +25,16 @@ export default function Groups() {
       sortBy: sortColumn,
       sortDirection
     }))
-  }, [request, page, sortColumn, sortDirection])
+  }, [request, page, sortColumn, sortDirection, sessionStats])
 
-  // Add logging to debug the data
-  useEffect(() => {
-    if (groups && groups.data) {
-      console.log('Groups data received:', groups.data);
-      // Check for any invalid date values
-      groups.data.forEach(group => {
-        if (group.createdAt && isNaN(new Date(group.createdAt).getTime())) {
-          console.error('Invalid createdAt date found:', group.createdAt, 'for group:', group.name);
-        }
-        if (group.lastStudied && isNaN(new Date(group.lastStudied).getTime())) {
-          console.error('Invalid lastStudied date found:', group.lastStudied, 'for group:', group.name);
-        }
-      });
-    }
-  }, [groups]);
+  const handlePracticeGroup = (groupId: number) => {
+    navigate(`/word_quiz/${groupId}`)
+  }
 
-  const columns = [
+  const columns: Column<WordGroup>[] = [
     {
-      key: 'name' as keyof WordGroup,
-      header: 'Name',
+      key: 'name',
+      header: 'Group Name',
       sortable: true,
       render: (group: WordGroup) => (
         <Link to={`/groups/${group.id}`} className="hover:underline">
@@ -50,45 +43,34 @@ export default function Groups() {
       )
     },
     {
-      key: 'description' as keyof WordGroup,
-      header: 'Description',
-      sortable: true
+      key: 'wordCount',
+      header: '# Words',
+      sortable: true,
+      render: () => 15
     },
     {
-      key: 'wordCount' as keyof WordGroup,
-      header: 'Words',
-      sortable: true
-    },
-    {
-      key: 'lastStudied' as keyof WordGroup,
+      key: 'lastStudied',
       header: 'Last Studied',
       sortable: true,
       render: (group: WordGroup) => {
-        if (!group.lastStudied) return 'Never';
-        try {
-          const date = new Date(group.lastStudied);
-          // Check if date is valid before formatting
-          return isNaN(date.getTime()) ? 'Invalid date' : format(date, 'PPp');
-        } catch (error) {
-          console.error('Error formatting lastStudied date:', error);
-          return 'Invalid date';
-        }
+        const lastSession = sessionStats.recentSessions
+          .filter(session => session.groupId === group.id)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+        
+        return lastSession ? format(new Date(lastSession.date), 'PPp') : 'Never';
       }
     },
     {
-      key: 'createdAt' as keyof WordGroup,
-      header: 'Created',
-      sortable: true,
-      render: (group: WordGroup) => {
-        try {
-          const date = new Date(group.createdAt);
-          // Check if date is valid before formatting
-          return isNaN(date.getTime()) ? 'Invalid date' : format(date, 'PP');
-        } catch (error) {
-          console.error('Error formatting createdAt date:', error);
-          return 'Invalid date';
-        }
-      }
+      key: 'id',
+      header: '',
+      sortable: false,
+      render: (group: WordGroup) => (
+        <div className="flex justify-end">
+          <Button onClick={() => handlePracticeGroup(group.id)}>
+            Practice
+          </Button>
+        </div>
+      )
     }
   ]
 
@@ -120,7 +102,7 @@ export default function Groups() {
         
         <Pagination
           currentPage={page}
-          totalPages={groups.totalPages}
+          totalPages={groups.pagination.total_pages}
           onPageChange={setPage}
         />
       </div>

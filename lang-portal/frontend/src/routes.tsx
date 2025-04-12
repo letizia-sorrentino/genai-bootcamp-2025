@@ -11,6 +11,7 @@ import GroupShow from './pages/GroupShow'
 import StudySessions from './pages/StudySessions'
 import StudySessionShow from './pages/StudySessionShow'
 import Settings from './pages/Settings'
+import WordQuizActivity from './pages/WordQuizActivity'
 
 export function AppRoutes() {
   return (
@@ -30,6 +31,8 @@ export function AppRoutes() {
         {/* Words */}
         <Route path="/words" element={<Words />} />
         <Route path="/words/:id" element={<WordShow />} />
+        <Route path="/word_quiz" element={<WordQuizActivity />} />
+        <Route path="/word_quiz/:groupId" element={<WordQuizActivity />} />
         
         {/* Groups */}
         <Route path="/groups" element={<Groups />} />

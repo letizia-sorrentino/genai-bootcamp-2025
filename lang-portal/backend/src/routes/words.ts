@@ -10,4 +10,6 @@ router.get('/', wordsController.getAll)
 // GET /api/words/:id - Get single word
 router.get('/:id', wordsController.getById)
 
+router.post('/:id/stats', wordsController.updateStats)
+
 export default router 

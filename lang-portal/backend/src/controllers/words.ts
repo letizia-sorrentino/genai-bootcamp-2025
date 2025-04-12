@@ -31,14 +31,22 @@ export const wordsController = {
       
       // Get words with stats
       const words = await db.all(`
+        WITH word_stats AS (
+          SELECT 
+            word_id,
+            SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) as correct_count,
+            SUM(CASE WHEN correct = 0 THEN 1 ELSE 0 END) as wrong_count
+          FROM word_review_items
+          GROUP BY word_id
+        )
         SELECT 
+          w.id,
           w.italian, 
           w.english,
-          COALESCE(SUM(CASE WHEN wri.correct = 1 THEN 1 ELSE 0 END), 0) as correct_count,
-          COALESCE(SUM(CASE WHEN wri.correct = 0 THEN 1 ELSE 0 END), 0) as wrong_count
+          COALESCE(ws.correct_count, 0) as correct_count,
+          COALESCE(ws.wrong_count, 0) as wrong_count
         FROM words w
-        LEFT JOIN word_review_items wri ON w.id = wri.word_id
-        GROUP BY w.id
+        LEFT JOIN word_stats ws ON w.id = ws.word_id
         ORDER BY ${sortBy} ${order}
         LIMIT ? OFFSET ?
       `, [itemsPerPage, offset])
@@ -64,25 +72,29 @@ export const wordsController = {
       
       // Get word with stats
       const word = await db.get(`
+        WITH word_stats AS (
+          SELECT 
+            word_id,
+            SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) as correct_count,
+            SUM(CASE WHEN correct = 0 THEN 1 ELSE 0 END) as wrong_count
+          FROM word_review_items
+          WHERE word_id = ?
+          GROUP BY word_id
+        )
         SELECT 
+          w.id,
           w.italian, 
-          w.english
+          w.english,
+          COALESCE(ws.correct_count, 0) as correct_count,
+          COALESCE(ws.wrong_count, 0) as wrong_count
         FROM words w
+        LEFT JOIN word_stats ws ON w.id = ws.word_id
         WHERE w.id = ?
-      `, [id])
+      `, [id, id])
       
       if (!word) {
         throw new NotFoundError(`Word with ID ${id} not found`)
       }
-      
-      // Get stats
-      const stats = await db.get(`
-        SELECT
-          COALESCE(SUM(CASE WHEN wri.correct = 1 THEN 1 ELSE 0 END), 0) as correct_count,
-          COALESCE(SUM(CASE WHEN wri.correct = 0 THEN 1 ELSE 0 END), 0) as wrong_count
-        FROM word_review_items wri
-        WHERE wri.word_id = ?
-      `, [id])
       
       // Get groups
       const groups = await db.all(`
@@ -96,8 +108,55 @@ export const wordsController = {
       
       successResponse(res, {
         ...word,
-        stats,
         groups
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  // Update word statistics
+  updateStats: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const db = await getDb()
+      const { id } = req.params
+      const { is_correct } = req.body
+
+      // Check if word exists
+      const word = await db.get('SELECT id FROM words WHERE id = ?', [id])
+      if (!word) {
+        throw new NotFoundError(`Word with ID ${id} not found`)
+      }
+
+      // Insert review item
+      await db.run(`
+        INSERT INTO word_review_items (word_id, correct)
+        VALUES (?, ?)
+      `, [id, is_correct ? 1 : 0])
+
+      // Get updated stats using the same CTE approach
+      const stats = await db.get(`
+        WITH word_stats AS (
+          SELECT 
+            word_id,
+            SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) as correct_count,
+            SUM(CASE WHEN correct = 0 THEN 1 ELSE 0 END) as wrong_count
+          FROM word_review_items
+          WHERE word_id = ?
+          GROUP BY word_id
+        )
+        SELECT
+          COALESCE(correct_count, 0) as correct_count,
+          COALESCE(wrong_count, 0) as wrong_count
+        FROM word_stats
+      `, [id])
+
+      logger.debug(`Updated stats for word ID ${id}: ${JSON.stringify(stats)}`)
+
+      successResponse(res, {
+        ...stats,
+        id: id,
+        success: true
       })
     } catch (error) {
       next(error)

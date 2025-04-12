@@ -1,58 +1,59 @@
-import { useEffect, useState } from "react"
-import { useApi } from "@/lib/hooks/use-api"
-import { api } from "@/lib/api-client"
-import { StudySession, PaginatedResponse, SortDirection } from "@/lib/types/api"
+import { useState } from "react"
 import { SortableTable } from "@/components/ui/table"
-import { Pagination } from "@/components/ui/pagination"
 import { format } from "date-fns"
 import { Link } from "react-router-dom"
 import { Column } from "@/lib/types/table"
+import { Card, CardContent } from "@/components/ui/card"
+import { useAppSelector } from "@/store/hooks"
+import { StudySession } from "@/lib/types/api"
 
 export default function StudySessions() {
-  const [page, setPage] = useState(1)
-  const [sortColumn, setSortColumn] = useState<keyof StudySession>('startTime')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [sortColumn, setSortColumn] = useState<keyof StudySession>('id')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   
-  const { data: sessions, loading, error, request } = useApi<PaginatedResponse<StudySession>>()
-
-  useEffect(() => {
-    request(() => api.getStudySessions({
-      page,
-      sortBy: sortColumn,
-      sortDirection
-    }))
-  }, [request, page, sortColumn, sortDirection])
+  // Get session data from Redux store
+  const sessionStats = useAppSelector(state => state.sessionStats)
+  const sessions = sessionStats.recentSessions.map((session, index) => ({
+    id: index + 1,
+    activity_name: 'Word Quiz',
+    group_id: session.groupId || 0,
+    group_name: session.groupId ? `Group ${session.groupId}` : 'General',
+    start_time: session.date,
+    end_time: session.date,
+    review_items_count: session.total
+  }))
 
   const columns: Column<StudySession>[] = [
     {
-      key: 'activityName' as keyof StudySession,
-      header: 'Activity',
+      key: 'activity_name' as keyof StudySession,
+      header: 'Activity Name',
       sortable: true
     },
     {
-      key: 'groupName' as keyof StudySession,
-      header: 'Group',
-      sortable: true
-    },
-    {
-      key: 'startTime' as keyof StudySession,
-      header: 'Date',
+      key: 'group_name' as keyof StudySession,
+      header: 'Group Name',
       sortable: true,
-      render: (session) => format(new Date(session.startTime), 'PPp')
+      render: (session) => (
+        <Link to={`/groups/${session.group_id}`} className="hover:underline">
+          {session.group_name}
+        </Link>
+      )
     },
     {
-      key: 'reviewItemCount' as keyof StudySession,
-      header: 'Items',
-      sortable: true
+      key: 'start_time' as keyof StudySession,
+      header: 'Start Time',
+      sortable: true,
+      render: (session) => format(new Date(session.start_time), 'PPp')
     },
     {
-      key: 'correctCount' as keyof StudySession,
-      header: 'Correct',
-      sortable: true
+      key: 'end_time' as keyof StudySession,
+      header: 'End Time',
+      sortable: true,
+      render: (session) => session.end_time ? format(new Date(session.end_time), 'PPp') : 'In Progress'
     },
     {
-      key: 'incorrectCount' as keyof StudySession,
-      header: 'Wrong',
+      key: 'review_items_count' as keyof StudySession,
+      header: 'Review Items',
       sortable: true
     }
   ]
@@ -66,29 +67,31 @@ export default function StudySessions() {
     }
   }
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
-  if (!sessions) return null
+  if (sessions.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Study Sessions</h1>
+        <p className="text-gray-500">No study sessions yet. Complete a quiz to see your sessions here.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Study Sessions</h1>
-      
-      <div className="space-y-4">
-        <SortableTable
-          data={sessions.data}
-          columns={columns}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-        />
-        
-        <Pagination
-          currentPage={page}
-          totalPages={sessions.totalPages}
-          onPageChange={setPage}
-        />
-      </div>
+
+      {/* Study Sessions Table */}
+      <Card>
+        <CardContent>
+          <SortableTable
+            data={sessions}
+            columns={columns}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 } 

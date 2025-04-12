@@ -1,95 +1,91 @@
-# Italian Language Learning Portal - Frontend
+# Language Learning Portal
 
-This is the frontend application for the Italian Language Learning Portal, built with React, TypeScript, and Vite.
+A modern web application for Italian language learning, built with React, TypeScript, and Tailwind CSS.
 
 ## Tech Stack
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- ShadcN UI
-- React Router DOM
+- **Frontend Framework**: React 18
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Component Library**: ShadCN UI
+- **State Management**: Redux Toolkit
+- **Build Tool**: Vite
+- **Testing**: Vitest
+- **API Client**: Custom fetch-based client with error handling and pagination support
+
+## Features
+
+- **Dashboard**: Overview of study progress and recent activity
+- **Study Activities**: Launch and manage different learning activities
+- **Word Management**: Browse and search Italian vocabulary
+- **Word Groups**: Organize words into thematic groups
+- **Study Sessions**: Track and review learning sessions
+- **Settings**: Configure app preferences and reset data
 
 ## Getting Started
 
-### Prerequisites
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-- Node.js (v16 or higher)
-- npm (v7 or higher)
+2. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-### Installation
-
-1. Clone the repository
-2. Navigate to the frontend directory:
-
-```bash
-cd frontend
-```
-
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-### Development
-
-To start the development server:
-```bash
-npm run dev
-```
-
-This will start the development server at `http://localhost:5173`
-
-### Building for Production
-
-To create a production build:
-```bash
-npm run build
-```
-
-To preview the production build:
-```bash
-npm run preview
-```
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Create production build
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+3. **Run Tests**
+   ```bash
+   npm run test
+   ```
 
 ## Project Structure
 
 ```
 frontend/
 ├── src/
-│   ├── components/     # Reusable components
+│   ├── components/     # Reusable UI components
+│   │   ├── ui/        # ShadCN UI components
+│   │   └── ...        # Custom components
+│   ├── lib/           # Utility functions and types
+│   │   ├── types/     # TypeScript interfaces and types
+│   │   └── ...        # Utility functions
 │   ├── pages/         # Page components
-│   ├── lib/           # Utilities and helpers
-│   ├── App.tsx        # Main App component
-│   ├── main.tsx       # Entry point
-│   └── index.css      # Global styles
+│   ├── store/         # Redux store configuration and slices
+│   ├── hooks/         # Custom React hooks
+│   ├── tests/         # Test files
+│   ├── App.tsx        # Main application component
+│   └── main.tsx       # Application entry point
 ├── public/            # Static assets
-└── ...config files
+└── tests/             # Test files
 ```
 
-## Features
+## State Management
 
-- Dashboard with study progress
-- Study activities management
-- Word and word group management
-- Study session tracking
-- Dark mode support
+The application uses Redux Toolkit for state management, with the following slices:
+
+- **sessionStats**: Tracks study session statistics and progress
+- **words**: Manages word data and pagination
+- **groups**: Handles word group data
+- **studyActivities**: Manages study activity data
+- **settings**: Stores user preferences
+
+## API Integration
+
+The application uses a custom API client (`api-client.ts`) that provides:
+
+- Automatic error handling
+- Pagination support
+- Type-safe API calls
+- Response transformation
 
 ## Contributing
 
 1. Create a new branch for your feature
 2. Make your changes
-3. Submit a pull request
+3. Run tests
+4. Submit a pull request
 
 ## License
 
-This project is private and confidential.
+MIT
